@@ -1,0 +1,9 @@
+Segmentation: Tim, Denny
+Feature Extraction: Stefan, Rogier
+
+Classification
+Auto-encoder
+
+Progress presentation
+
+Greymaps > Bitmaps
