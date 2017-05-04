@@ -5,4 +5,5 @@ Chinese-unicode-chars-MingTi
 Chinese-unicode-chars-TeMing
 Chinese-unicode-chars-XinSong
 Chinese-unicode-chars-YanKai
-.idea/workspace.xml
+.idea/*
+.idea/misc.xml
