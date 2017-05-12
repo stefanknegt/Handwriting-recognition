@@ -119,7 +119,7 @@ def split_with_con_comp(img):
             ordered_labels = np.argsort(sizes)
             sz = [int(x) for x in sizes.tolist()[1:]]
             print(sz)
-            ordered_labels = [i[0] for i in sorted(enumerate(sz), key=lambda x:x[1])]
+            ordered_labels = [i[0] for i in sorted(enumerate(sz), key=lambda x:x[1], reverse=True)]
             print(ordered_labels)
             label_i = 1
             components = []
