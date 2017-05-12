@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 from edge_boxes_with_python.edge_boxes import get_windows
 from skimage import data
+import math
 
 try:
     from skimage import filters
@@ -17,7 +18,7 @@ NOISE_SIZE_TH = 3  # threshold for what size counts as noise
 MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
-
+OVERLAP_TH = 0.1
 
 def binarize(img):
     '''turns gray scale image into binary based on threshold'''
@@ -38,9 +39,21 @@ def binarize_otsu(img):
 
 def rotate_lines(img):
     "Rotates lines to make the characters line up horizontally for further segmentation"
+    hor = []
+    vert = []
+    for i in range(0, img.shape[0]):
+        for j in range(0, img.shape[1]):
+            if img[i][j] < 1:
+                hor.append(j)
+                vert.append(i)
 
-    angle =
-    rotated_img = ndimage.rotate(img, angle)
+    pixels = np.array([hor, vert])
+    cov = np.cov(pixels)
+    print(cov.tolist())
+    w, v = np.linalg.eig(cov)
+    angle = math.atan2(v[0,1], v[1,1])
+    print(angle)
+    rotated_img = ndimage.rotate(img, math.degrees(-angle), order=1)
     return rotated_img
 
 def remove_table_lines(img, x, y):
@@ -65,15 +78,18 @@ def remove_noise(img, threshold, inv=True):
         recon_image = np.logical_not(recon_image)
     return recon_image
 
-def density_plot(img):
+def density_plot(img, axis):
     '''takes an image, and returns a histogram of the amount of pixels per column'''
-    hist = [0] * img.shape[1]
-    for i in range(0, img.shape[1]):
-        for j in range(0, img.shape[0]):
-            hist[i] += (1 - img[j][i])
+    hist = [0] * img.shape[axis]
+    for i in range(0, img.shape[axis]):
+        for j in range(0, img.shape[1 - axis]):
+            if axis == 1:
+                hist[i] += (1 - img[j][i])
+            else:
+                hist[i] += (1 - img[i][j])
     return hist
 
-def split_by_density(img, hist):
+def split_by_density(img, hist, axis):
     '''split image based on vertical density with a threshold'''
     img_lst = []
     lines = []
@@ -91,7 +107,10 @@ def split_by_density(img, hist):
         elif image_flag and hist[i] <= SPLIT_TH:
             im_stop = i
             image_flag = False
-            img_lst.append(img[:, im_start:im_stop])
+            if axis == 1:
+                img_lst.append(img[:, im_start:im_stop])
+            else:
+                img_lst.append(img[im_start:im_stop, :])
             lines.append(i)
         elif not image_flag:
             w += 1
@@ -105,8 +124,8 @@ class Component:
         self.label = None
 
 def split_with_con_comp(img):
-    hist = density_plot(img)
-    img_lst, lines, wh_sp = split_by_density(img, hist)
+    hist = density_plot(img, 1)
+    img_lst, lines, wh_sp = split_by_density(img, hist, 1)
     img_lst_new = []
     line_count = 0
     for i in range(0, len(img_lst)):
@@ -136,11 +155,11 @@ def split_with_con_comp(img):
 
                 for comp in components:
                     if new_comp.start < comp.start:
-                        if new_comp.stop > comp.start and (new_comp.stop - comp.start) / min(new_comp.size, comp.size) > 0.1:
+                        if new_comp.stop > comp.start and (new_comp.stop - comp.start) / min(new_comp.size, comp.size) > OVERLAP_TH:
                             new_comp.label = comp.label
                             break
                     else:
-                        if comp.stop > new_comp.start and (comp.stop - new_comp.start) / min(new_comp.size, comp.size) > 0.1:
+                        if comp.stop > new_comp.start and (comp.stop - new_comp.start) / min(new_comp.size, comp.size) > OVERLAP_TH:
                             new_comp.label = comp.label
                             break
                 if not new_comp.label:
@@ -170,49 +189,66 @@ def split_with_con_comp(img):
 
 def main():
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
-    line = misc.imread(
-        'Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-002-y1=280-y2=430.pgm')  # character touches table line
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm')
-    line = misc.imread(
-        'Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
-    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-002-y1=280-y2=430.pgm')  # character touches table line
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm')
+    # line = misc.imread(
+    #     'Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
+    # # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18637_0002-line-003-y1=343-y2=508.pgm') # background gray
-    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0005-line-003-y1=269-y2=419.pgm')
-
-    fig = plt.figure()
-    a = fig.add_subplot(3, 1, 1)
-    plt.imshow(line, cmap=plt.cm.gray)
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18637_0002-line-003-y1=343-y2=508.pgm') # background gray
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18637_0022-line-009-y1=1226-y2=1386.pgm') # tilted
+    if False:
+        fig = plt.figure()
+        a = fig.add_subplot(3, 1, 1)
+        plt.imshow(line, cmap=plt.cm.gray)
+        otsu = binarize_otsu(line)
+        normal = binarize(line)
+        a = fig.add_subplot(3, 1, 2)
+        plt.imshow(normal, cmap=plt.cm.gray)
+        a = fig.add_subplot(3, 1, 3)
+        plt.imshow(otsu, cmap=plt.cm.gray)
+        plt.show()
     otsu = binarize_otsu(line)
-    normal = binarize(line)
-    a = fig.add_subplot(3, 1, 2)
-    plt.imshow(normal, cmap=plt.cm.gray)
-    a = fig.add_subplot(3, 1, 3)
-    plt.imshow(otsu, cmap=plt.cm.gray)
-    plt.show()
-
+    t = rotate_lines(otsu)
     test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
     test = remove_noise(test, NOISE_SIZE_TH)
+    if False:
+        fig = plt.figure()
+        a = fig.add_subplot(3, 1, 1)
+        plt.imshow(otsu, cmap=plt.cm.gray)
+        a = fig.add_subplot(3, 1, 2)
+        plt.imshow(t, cmap=plt.cm.gray)
+        a = fig.add_subplot(3, 1, 3)
+        plt.imshow(test, cmap=plt.cm.gray)
+        plt.show()
 
-    hist = density_plot(test)
-    im_list_dense, lines_a, w = split_by_density(test, hist)
-    im_list, lines_b = split_with_con_comp(test)
-
+    h_hist = density_plot(test, 0)
+    plt.plot(h_hist)
     plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
-    for val in lines_a:
-        plt.plot([val, val], [0, line.shape[0]], 'b')
     plt.show()
-    plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
-    for val in lines_b:
-        plt.plot([val, val], [0, line.shape[0]], 'r')
-    plt.show()
+    lines_list, lines, white_space = split_by_density(test, h_hist, 0)
 
-    for image in im_list:
+    if True:
+        char_list = []
+        for lin in lines_list:
+            im_list, lines = split_with_con_comp(lin)
+            char_list.extend(im_list)
+
+        # plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
+        # for val in lines_a:
+        #     plt.plot([val, val], [0, line.shape[0]], 'b')
+        # plt.show()
+        # plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
+        # for val in lines_b:
+        #     plt.plot([val, val], [0, line.shape[0]], 'r')
+        # plt.show()
+
+    for image in char_list:
         plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
         plt.show()
 
