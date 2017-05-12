@@ -3,13 +3,21 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from edge_boxes_with_python.edge_boxes import get_windows
+from skimage import data
 
-BINARY_TH = 200 # binary threshold
-NOISE_SIZE_TH = 3 # threshold for what size counts as noise
+try:
+    from skimage import filters
+except ImportError:
+    from skimage import filter as filters
+from skimage import exposure
+
+BINARY_TH = 200  # binary threshold
+NOISE_SIZE_TH = 3  # threshold for what size counts as noise
 # minimum nr of pixels lines have to be to count as table lines
 MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
+
 
 def binarize(img):
     '''turns gray scale image into binary based on threshold'''
@@ -19,6 +27,14 @@ def binarize(img):
                 img[i][j] = 0
             else:
                 img[i][j] = 1
+    return img
+
+
+def binarize_otsu(img):
+    "Turns greyscale image into binary using Otsu's method"
+    val = filters.threshold_otsu(img)
+    mask = img > val
+    return mask
 
 
 def remove_table_lines(img, x, y):
@@ -149,24 +165,50 @@ def split_with_con_comp(img):
 
 def main():
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-002-y1=280-y2=430.pgm') # character touches table line
+    line = misc.imread(
+        'Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-002-y1=280-y2=430.pgm')  # character touches table line
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm')
+    line = misc.imread(
+        'Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
+    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
+    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0005-line-001-y1=0-y2=142.pgm') # bad line
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0005-line-003-y1=269-y2=419.pgm')
-    # plt.imshow(line, cmap=plt.cm.gray)
-    # plt.show()
-    binarize(line)
-    test = remove_table_lines(line, 1, MIN_TABLE_SIZE_H) # removes horizontal table lines
-    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1) # removes vertical table lines
+
+    fig = plt.figure()
+    a = fig.add_subplot(3, 1, 1)
+    plt.imshow(line, cmap=plt.cm.gray)
+    otsu = binarize_otsu(line)
+    normal = binarize(line)
+    a = fig.add_subplot(3, 1, 2)
+    plt.imshow(normal, cmap=plt.cm.gray)
+    a = fig.add_subplot(3, 1, 3)
+    plt.imshow(otsu, cmap=plt.cm.gray)
+    plt.show()
+
+    test = remove_table_lines(line, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
+    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
     test = remove_noise(test, NOISE_SIZE_TH)
+    # plt.imshow(line, cmap=plt.cm.gray, vmin=0, vmax=1)
+    # plt.show()
+    # plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
+    # plt.show()
 
     # plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
     # plt.show()
     hist = density_plot(test)
+    # plt.plot(hist)
+    test_inv = np.logical_not(test)
+    labels, n_labels = ndimage.label(test_inv)
+    # plt.imshow(labels, cmap=plt.cm.spectral)
+    # plt.show()
+    # print(labels.tolist())
+    im_list = split_by_density(test, hist)
+    im_list = split_with_con_comp(im_list)
     #plt.plot(hist)
     # test_inv = np.logical_not(test)
     # labels, n_labels = ndimage.label(test_inv)
