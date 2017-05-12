@@ -157,8 +157,8 @@ def split_with_con_comp(img):
                 lines.append(line_count + slic[1])
                 new_im = image[:, slic[0]:slic[1]]
                 img_lst_new.append(new_im)
-            plt.imshow(image)
-            plt.show()
+            # plt.imshow(image)
+            # plt.show()
         line_count += image.shape[1]
     return img_lst_new, lines
 
@@ -175,7 +175,7 @@ def main():
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
-    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0005-line-001-y1=0-y2=142.pgm') # bad line
+    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18637_0002-line-003-y1=343-y2=508.pgm') # background gray
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0005-line-003-y1=269-y2=419.pgm')
 
     fig = plt.figure()
@@ -189,29 +189,11 @@ def main():
     plt.imshow(otsu, cmap=plt.cm.gray)
     plt.show()
 
-    test = remove_table_lines(line, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
+    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
     test = remove_noise(test, NOISE_SIZE_TH)
-    # plt.imshow(line, cmap=plt.cm.gray, vmin=0, vmax=1)
-    # plt.show()
-    # plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
-    # plt.show()
 
-    # plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
-    # plt.show()
     hist = density_plot(test)
-    # plt.plot(hist)
-    # plt.imshow(labels, cmap=plt.cm.spectral)
-    # plt.show()
-    # print(labels.tolist())
-    im_list, lines, white_space = split_by_density(test, hist)
-    im_list, lines = split_with_con_comp(test)
-    #plt.plot(hist)
-    # test_inv = np.logical_not(test)
-    # labels, n_labels = ndimage.label(test_inv)
-    #plt.imshow(labels, cmap=plt.cm.spectral)
-    #plt.show()
-    #print(labels.tolist())
     im_list_dense, lines_a, w = split_by_density(test, hist)
     im_list, lines_b = split_with_con_comp(test)
 
@@ -224,9 +206,9 @@ def main():
         plt.plot([val, val], [0, line.shape[0]], 'r')
     plt.show()
 
-    # for image in im_list:
-    #     plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
-    #     plt.show()
+    for image in im_list:
+        plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
+        plt.show()
 
 if __name__ == '__main__':
     main()
