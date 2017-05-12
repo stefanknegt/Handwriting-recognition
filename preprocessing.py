@@ -110,8 +110,7 @@ def split_with_con_comp(img):
             img_lst_new.append(image)
         else:
             print('trying to split wide image')
-            #plt.imshow(image)
-            #plt.show()
+
             img_inv = np.logical_not(image)
             labels, n_labels = ndimage.label(img_inv)
             mask = image < image.mean()
@@ -124,12 +123,10 @@ def split_with_con_comp(img):
             label_i = 1
             components = []
             for i in range(1, n_labels + 1):
-                slice_x, slice_y = ndimage.find_objects(labels==i)[0]
+                slice_x, slice_y = ndimage.find_objects(labels == ordered_labels[i - 1] + 1)[0]
                 new_comp = Component(slice_y.start, slice_y.stop)
                 if not components:
                     new_comp.label = label_i
-
-                # components = sorted(components, key=lambda Component: Component.size, reverse=True)
 
                 for comp in components:
                     if new_comp.start < comp.start:
@@ -144,11 +141,12 @@ def split_with_con_comp(img):
                     label_i += 1
                     new_comp.label = label_i
                 components.append(new_comp)
+                print(new_comp.__dict__)
 
             min_max = [list([9999, 0])] * label_i
             for comp in components:
-                print(min_max)
-                print(comp.__dict__)
+                # print(min_max)
+                # print(comp.__dict__)
                 if comp.start < min_max[comp.label - 1][0]:
                     min_max[comp.label - 1] = list([comp.start, min_max[comp.label - 1][1]])
                 if comp.stop > min_max[comp.label - 1][1]:
@@ -159,7 +157,8 @@ def split_with_con_comp(img):
                 lines.append(line_count + slic[1])
                 new_im = image[:, slic[0]:slic[1]]
                 img_lst_new.append(new_im)
-
+            plt.imshow(image)
+            plt.show()
         line_count += image.shape[1]
     return img_lst_new, lines
 
@@ -171,9 +170,9 @@ def main():
     line = misc.imread(
         'Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
-    line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
+    # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0005-line-001-y1=0-y2=142.pgm') # bad line
@@ -202,13 +201,11 @@ def main():
     # plt.show()
     hist = density_plot(test)
     # plt.plot(hist)
-    test_inv = np.logical_not(test)
-    labels, n_labels = ndimage.label(test_inv)
     # plt.imshow(labels, cmap=plt.cm.spectral)
     # plt.show()
     # print(labels.tolist())
-    im_list = split_by_density(test, hist)
-    im_list = split_with_con_comp(im_list)
+    im_list, lines, white_space = split_by_density(test, hist)
+    im_list, lines = split_with_con_comp(test)
     #plt.plot(hist)
     # test_inv = np.logical_not(test)
     # labels, n_labels = ndimage.label(test_inv)
