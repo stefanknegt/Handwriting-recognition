@@ -36,6 +36,12 @@ def binarize_otsu(img):
     mask = img > val
     return mask
 
+def rotate_lines(img):
+    "Rotates lines to make the characters line up horizontally for further segmentation"
+
+    angle =
+    rotated_img = ndimage.rotate(img, angle)
+    return rotated_img
 
 def remove_table_lines(img, x, y):
     '''Removes horizontal or vertical table lines'''
