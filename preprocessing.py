@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from edge_boxes_with_python.edge_boxes import get_windows
 from skimage import data
 import math
+from scipy.optimize import curve_fit
+import scipy as sy
 
 try:
     from skimage import filters
@@ -19,6 +21,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
+DEBUG = False
 
 def binarize(img):
     '''turns gray scale image into binary based on threshold'''
@@ -187,6 +190,29 @@ def split_with_con_comp(img):
         line_count += image.shape[1]
     return img_lst_new, lines
 
+def remove_whitespace_edges(img):
+    for i in range(0,img.shape[0]):
+        for j in range(0, img.shape[1]):
+            if img[i][j]!=1:
+                break
+        if img[i][j] !=1:
+            break
+    img = np.delete(img,np.arange(i),0)
+    ud_img = np.flipud(img)
+    for i in range(0,ud_img.shape[0]):
+        for j in range(0, ud_img.shape[1]):
+            if ud_img[i][j]!=1:
+                break
+        if ud_img[i][j] !=1:
+            break
+    ud_img = np.delete(ud_img, np.arange(i), 0)
+    img = np.flipud(ud_img)
+    return img
+
+
+
+
+
 def main():
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-002-y1=280-y2=430.pgm')  # character touches table line
@@ -201,7 +227,7 @@ def main():
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18637_0002-line-003-y1=343-y2=508.pgm') # background gray
     # line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18637_0022-line-009-y1=1226-y2=1386.pgm') # tilted
-    if False:
+    if DEBUG:
         fig = plt.figure()
         a = fig.add_subplot(3, 1, 1)
         plt.imshow(line, cmap=plt.cm.gray)
@@ -215,9 +241,10 @@ def main():
     otsu = binarize_otsu(line)
     t = rotate_lines(otsu)
     test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
+    test_new = remove_table_lines(t, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
     test = remove_noise(test, NOISE_SIZE_TH)
-    if False:
+    if DEBUG:
         fig = plt.figure()
         a = fig.add_subplot(3, 1, 1)
         plt.imshow(otsu, cmap=plt.cm.gray)
@@ -227,7 +254,7 @@ def main():
         plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
 
-    h_hist = density_plot(test, 0)
+    h_hist = density_plot(test, 1)
     plt.plot(h_hist)
     plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
     plt.show()
@@ -249,7 +276,14 @@ def main():
         # plt.show()
 
     for image in char_list:
+        fig = plt.figure()
+        fig.add_subplot(2, 1, 1)
+        h_hist = density_plot(image, 0)
         plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
+        new_img = remove_whitespace_edges(image)
+        fig.add_subplot(2, 1, 2)
+        plt.imshow(new_img, cmap=plt.cm.gray, vmin=0, vmax=1)
+
         plt.show()
 
 if __name__ == '__main__':

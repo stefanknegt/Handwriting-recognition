@@ -13,7 +13,7 @@ print(face)"""
 
 threshold = 200
 
-img = misc.imread('4ea6_AJGVLYWOIYHD.pgm')
+img = misc.imread('Train/annotated_crops/4ea6/4ea6_AJGVLYWOIYHD.pgm')
 img = img.astype(int)
 
 print(type(np.unique(img)))
@@ -29,6 +29,8 @@ for i in range(0,img.shape[0]):
 plt.imshow(img,cmap=plt.cm.gray)
 plt.show()"""
 
+
+
 countColumn = 0
 countRow = 0
 rows = np.zeros(shape=(img.shape[0],1))
@@ -41,22 +43,22 @@ for i in range(0,img.shape[0]):
         if((img[i][j] != img[i][j-1])):
             rows[i] += 1
             countRow += 1;
-            rowlines.append(j)
+            rowlines.append((i,j))
     rows[i] = float(rows[i])/2
 
-print(countRow)
-print(rows)
+#print(countRow)
+#print(rows)
 
-for j in range(1,img.shape[1]):
-    for i in range(0,img.shape[0]):
+for j in range(0,img.shape[1]):
+    for i in range(1,img.shape[0]):
         if((img[i][j] != img[i-1][j])):
             cols[j] += 1
             countColumn += 1
-            collines.append(i)
+            collines.append((i,j))
     cols[j] = float(cols[i])/2
 
-print(countColumn)
-print(cols)
+#print(countColumn)
+#print(cols)
 
 plt.imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
 for val in rowlines:
