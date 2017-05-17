@@ -82,7 +82,7 @@ def remove_noise(img, threshold, inv=True):
     return recon_image
 
 def density_plot(img, axis):
-    '''takes an image, and returns a histogram of the amount of pixels per column'''
+    '''takes an image, and returns a histogram of the amount of pixels per column if axis==1 else per row'''
     hist = [0] * img.shape[axis]
     for i in range(0, img.shape[axis]):
         for j in range(0, img.shape[1 - axis]):
@@ -93,7 +93,7 @@ def density_plot(img, axis):
     return hist
 
 def split_by_density(img, hist, axis):
-    '''split image based on vertical density with a threshold'''
+    '''split image based on axis density with a threshold. 0 for horizontal density, 1 for vertical'''
     img_lst = []
     lines = []
     image_flag = False
@@ -254,8 +254,8 @@ def main():
         plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
 
-    h_hist = density_plot(test, 1)
-    plt.plot(h_hist)
+    h_hist = density_plot(test, 0)
+    # plt.plot(h_hist)
     plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
     plt.show()
     lines_list, lines, white_space = split_by_density(test, h_hist, 0)
@@ -263,6 +263,8 @@ def main():
     if True:
         char_list = []
         for lin in lines_list:
+            #plt.imshow(lin, cmap=plt.cm.gray)
+            #plt.show()
             im_list, lines = split_with_con_comp(lin)
             char_list.extend(im_list)
 
