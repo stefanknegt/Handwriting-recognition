@@ -190,7 +190,8 @@ def split_with_con_comp(img):
         line_count += image.shape[1]
     return img_lst_new, lines
 
-def remove_whitespace_edges(img):
+def remove_whitespace_top_bottom(img):
+    ''' This removes the whitespace from top and bottom of an img (np-array)'''
     for i in range(0,img.shape[0]):
         for j in range(0, img.shape[1]):
             if img[i][j]!=1:
@@ -210,6 +211,89 @@ def remove_whitespace_edges(img):
     return img
 
 
+def calculate_sizes(char_list):
+    sizes = np.zeros((len(char_list),2), dtype=np.int)
+    i=0
+    for image in char_list:
+        sizes[i] = [image.shape[0], image.shape[1]]
+        i +=1
+    mean = np.mean(sizes, axis = 0)
+    std = np.std(sizes, axis=0)
+
+    print(mean.tolist(), std.tolist())
+    print(np.max(sizes, axis=0).tolist())
+
+def sizes(image, rotate, output):
+    if rotate:
+        image = np.rot90(image, 3)
+    edge = (output/16)/2
+    print(edge)
+    if image.shape[0]!=image.shape[1]:
+        if image.shape[0] >= image.shape[1]:
+            max_size = image.shape[0]
+        else:
+            max_size = image.shape[1]
+
+        if DEBUG:
+            fig = plt.figure()
+            fig.add_subplot(3, 1, 1)
+            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
+
+        diff0 = (max_size - image.shape[0])
+        if diff0 <= 0:
+            pass
+        else:
+            if diff0%2!=0:
+                diff0 += 1
+                a = np.ones((1, image.shape[0]), dtype=np.int)
+                a = a * 255
+                image = np.insert(image, 0, a, 1)
+            diff0 = int(diff0/ 2)
+            a = np.ones((diff0, image.shape[1]), dtype=np.int)
+            a = a*255
+            image = np.insert(image, 0, a, 0)
+            image = np.concatenate((image, a), axis=0)
+
+        diff1 = max_size - image.shape[1]
+        if diff1 <= 0:
+            pass
+        else:
+            if diff1%2!=0:
+                diff1 += 1
+                a = np.ones((1, image.shape[1]), dtype=np.int)
+                a = a * 255
+                image = np.insert(image, 0, a, 0)
+            diff1 = int(diff1/ 2)
+            a = np.ones((diff1, image.shape[0]), dtype=np.int)
+            a = a*255
+            image = np.insert(image, 0, a, 1)
+            a = np.ones((image.shape[0], diff1), dtype=np.int)
+            a = a*255
+            image = np.concatenate((image, a), axis=1)
+
+        if DEBUG:
+            fig.add_subplot(3,1,2)
+            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
+
+        ''' ERROR!! '''
+        new_image = misc.imresize(image, (output-int(2*edge), output-int(2*edge)), interp='nearest')
+        a = np.ones((edge, new_image.shape[0]), dtype=np.int)
+        a = a * 255
+        new_image = np.insert(new_image, 0, a, 1)
+        a = np.ones((new_image.shape[0], edge), dtype=np.int)
+        a = a * 255
+        new_image = np.concatenate((new_image, a), axis=1)
+        a = np.ones((edge, new_image.shape[1]), dtype=np.int)
+        a = a * 255
+        new_image = np.insert(new_image, 0, a, 0)
+        new_image = np.concatenate((new_image, a), axis=0)
+
+        if DEBUG:
+            fig.add_subplot(3,1,3)
+            plt.imshow(new_image, cmap=plt.cm.gray, vmin=0, vmax=1)
+            plt.show()
+
+        return new_image
 
 
 
@@ -241,16 +325,22 @@ def main():
     otsu = binarize_otsu(line)
     t = rotate_lines(otsu)
     test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
-    test_new = remove_table_lines(t, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
     test = remove_noise(test, NOISE_SIZE_TH)
+
+    test1 = remove_table_lines(t, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
+    test1 = remove_table_lines(test1, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
+    test1 = remove_noise(test1, NOISE_SIZE_TH)
+
     if DEBUG:
         fig = plt.figure()
-        a = fig.add_subplot(3, 1, 1)
-        plt.imshow(otsu, cmap=plt.cm.gray)
-        a = fig.add_subplot(3, 1, 2)
+        a = fig.add_subplot(4, 1, 1)
         plt.imshow(t, cmap=plt.cm.gray)
-        a = fig.add_subplot(3, 1, 3)
+        a = fig.add_subplot(4, 1, 2)
+        plt.imshow(test1, cmap=plt.cm.gray)
+        a = fig.add_subplot(4, 1, 3)
+        plt.imshow(otsu, cmap=plt.cm.gray)
+        a = fig.add_subplot(4, 1, 4)
         plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
 
@@ -277,16 +367,27 @@ def main():
         #     plt.plot([val, val], [0, line.shape[0]], 'r')
         # plt.show()
 
+    # new_list = []
+    # print(new_list)
     for image in char_list:
-        fig = plt.figure()
-        fig.add_subplot(2, 1, 1)
-        h_hist = density_plot(image, 0)
-        plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
-        new_img = remove_whitespace_edges(image)
-        fig.add_subplot(2, 1, 2)
-        plt.imshow(new_img, cmap=plt.cm.gray, vmin=0, vmax=1)
+        new_img = remove_whitespace_top_bottom(image)
+        # new_list.insert(0,new_img)
+        # print(new_list)
+        final_img = sizes(new_img, True, 128)
 
-        plt.show()
+        if DEBUG:
+            fig = plt.figure()
+            fig.add_subplot(2, 1, 1)
+            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
+            h_hist = density_plot(image, 0)
+
+            x = np.arange(len(h_hist))
+            plt.plot(h_hist, x)
+            fig.add_subplot(2, 1, 2)
+            plt.imshow(new_img, cmap=plt.cm.gray, vmin=0, vmax=1)
+            plt.show()
+
+    # calculate_sizes(new_list)
 
 if __name__ == '__main__':
     main()
