@@ -4,8 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import misc
 from scipy.optimize import curve_fit
+from PIL import Image
 
-DEBUG_3 = True
+DEBUG_3 = False
 
 def read_pgm(filename, byteorder='>'):
     """Return image data from a raw PGM file as numpy array.
@@ -44,31 +45,33 @@ def main():
 
 def count():
     txt = ''
-    for dir in os.listdir('data'):
+    total = 0
+    for dir in os.listdir('annotated_crops/original'):
         txt = txt+dir
         count = 0
-        pa = os.path.join('data', dir)
+        pa = os.path.join('annotated_crops/original', dir)
         for filename in os.listdir(pa):
             pat = os.path.join(pa, filename)
             if os.path.isfile(pat):
                 count += 1
+                total += 1
         txt = txt + ', ' + str(count) + '\n'
         
-        
+    print(total)
     text_file = open("Occurences.txt", "w")
     text_file.write(txt)
     text_file.close()
 
 def sizes():
     orig = 'annotated_crops/original'
-    #new = 'annotated_crops/64'
+    new = 'annotated_crops/128'
     sizes = np.zeros((27025,2), dtype=int)
     i=0
     for dir in os.listdir(orig):
-        #if not os.path.exists('annotated_crops/64/'+dir):
-       #    os.makedirs('annotated_crops/64/'+dir)
+        if not os.path.exists('annotated_crops/128/'+dir):
+           os.makedirs('annotated_crops/128/'+dir)
         pa = os.path.join(orig, dir)
-        #pa2 = os.path.join(new, dir)
+        pa2 = os.path.join(new, dir)
         for filename in os.listdir(pa):
             pat = os.path.join(pa, filename)
             if os.path.isfile(pat):
@@ -125,15 +128,29 @@ def sizes():
                         fig.add_subplot(3,1,2)
                         plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
 
-                    ''' ERROR!! '''
-                    new_image = misc.imresize(image, (64,64), interp='nearest')
+                new_image = misc.imresize(image, (120,120), interp='nearest')
+                a = np.ones((4, new_image.shape[0]), dtype=np.int)
+                a = a * 255
+                new_image = np.insert(new_image, 0, a, 1)
+                a = np.ones((new_image.shape[0], 4), dtype=np.int)
+                a = a * 255
+                new_image = np.concatenate((new_image, a), axis=1)
+                a = np.ones((4, new_image.shape[1]), dtype=np.int)
+                a = a * 255
+                new_image = np.insert(new_image, 0, a, 0)
+                new_image = np.concatenate((new_image, a), axis=0)
+                image = new_image
 
-                    if DEBUG_3:
-                        fig.add_subplot(3,1,3)
-                        plt.imshow(new_image, cmap=plt.cm.gray, vmin=0, vmax=1)
-                        plt.show()
+                if DEBUG_3:
+                    fig.add_subplot(3,1,3)
+                    plt.imshow(new_image, cmap=plt.cm.gray, vmin=0, vmax=1)
+                    plt.show()
 
+                im = Image.fromarray(image.astype(np.uint8))
+                im.save(pa2 + '/' + filename)
+
+    print('done')
 
 if __name__ == '__main__':
-    sizes()
+    count()
 
