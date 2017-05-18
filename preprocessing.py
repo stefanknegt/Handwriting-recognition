@@ -87,8 +87,9 @@ def density_plot(img, axis):
                 hist[i] += (1 - img[i][j])
     return hist
 
-def split_by_density(img, hist, axis):
+def split_by_density(img, axis):
     '''split image based on axis density with a threshold. 0 for horizontal density, 1 for vertical'''
+    hist = density_plot(img, axis)
     img_lst = []
     lines = []
     image_flag = False
@@ -98,7 +99,7 @@ def split_by_density(img, hist, axis):
         if not image_flag and hist[i] > SPLIT_TH:
             im_start = i
             image_flag = True
-            lines.append(i)
+            #lines.append(i)
             #track nr of whitespaces previous to image segment
             white_space.append(w)
             w = 0
@@ -109,7 +110,7 @@ def split_by_density(img, hist, axis):
                 img_lst.append(img[:, im_start:im_stop])
             else:
                 img_lst.append(img[im_start:im_stop, :])
-            lines.append(i)
+            lines.append((im_start, im_stop))
         elif not image_flag:
             w += 1
     return img_lst, lines, white_space
@@ -122,8 +123,8 @@ class Component:
         self.label = None
 
 def split_with_con_comp(img):
-    hist = density_plot(img, 1)
-    img_lst, lines, wh_sp = split_by_density(img, hist, 1)
+    # hist = density_plot(img, 1)
+    img_lst, lines, wh_sp = split_by_density(img, 1)
     img_lst_new = []
     line_count = 0
     for i in range(0, len(img_lst)):
@@ -168,20 +169,17 @@ def split_with_con_comp(img):
 
             min_max = [list([9999, 0])] * label_i
             for comp in components:
-                # print(min_max)
-                # print(comp.__dict__)
                 if comp.start < min_max[comp.label - 1][0]:
                     min_max[comp.label - 1] = list([comp.start, min_max[comp.label - 1][1]])
                 if comp.stop > min_max[comp.label - 1][1]:
                     min_max[comp.label - 1] = list([min_max[comp.label - 1][0], comp.stop])
 
             for slic in min_max:
-                lines.append(line_count + slic[0])
-                lines.append(line_count + slic[1])
+                lines.append((line_count + slic[0], line_count + slic[1]))
+                # lines.append()
                 new_im = image[:, slic[0]:slic[1]]
                 img_lst_new.append(new_im)
-            # plt.imshow(image)
-            # plt.show()
+
         line_count += image.shape[1]
     return img_lst_new, lines
 
@@ -290,6 +288,13 @@ def sizes(image, rotate, output):
         return new_image
 
 
+def preprocess_img(img):
+    img = binarize_otsu(img)
+    img = remove_table_lines(img, 1, MIN_TABLE_SIZE_H)
+    img = remove_table_lines(img, MIN_TABLE_SIZE_V, 1)
+    img = remove_noise(img, NOISE_SIZE_TH)
+    return img
+
 
 def main():
     line = misc.imread('Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
@@ -338,11 +343,11 @@ def main():
         plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
 
-    h_hist = density_plot(test, 0)
+    # h_hist = density_plot(test, 0)
     # plt.plot(h_hist)
     plt.imshow(test, cmap=plt.cm.gray, vmin=0, vmax=1)
     plt.show()
-    lines_list, lines, white_space = split_by_density(test, h_hist, 0)
+    lines_list, lines, white_space = split_by_density(test, 0)
 
     if True:
         char_list = []
