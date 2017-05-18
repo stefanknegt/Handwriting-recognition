@@ -1,12 +1,7 @@
 from scipy import misc, ndimage
 import numpy as np
-import os
 import matplotlib.pyplot as plt
-from edge_boxes_with_python.edge_boxes import get_windows
-from skimage import data
 import math
-from scipy.optimize import curve_fit
-import scipy as sy
 
 try:
     from skimage import filters
@@ -21,7 +16,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
-DEBUG = False
+DEBUG = True
 
 def binarize(img):
     '''turns gray scale image into binary based on threshold'''
@@ -226,8 +221,7 @@ def calculate_sizes(char_list):
 def sizes(image, rotate, output):
     if rotate:
         image = np.rot90(image, 3)
-    edge = (output/16)/2
-    print(edge)
+    edge = int((output/16.0)/2.0)
     if image.shape[0]!=image.shape[1]:
         if image.shape[0] >= image.shape[1]:
             max_size = image.shape[0]
@@ -248,7 +242,7 @@ def sizes(image, rotate, output):
                 a = np.ones((1, image.shape[0]), dtype=np.int)
                 a = a * 255
                 image = np.insert(image, 0, a, 1)
-            diff0 = int(diff0/ 2)
+            diff0 = int(diff0/ 2.0)
             a = np.ones((diff0, image.shape[1]), dtype=np.int)
             a = a*255
             image = np.insert(image, 0, a, 0)
@@ -263,7 +257,7 @@ def sizes(image, rotate, output):
                 a = np.ones((1, image.shape[1]), dtype=np.int)
                 a = a * 255
                 image = np.insert(image, 0, a, 0)
-            diff1 = int(diff1/ 2)
+            diff1 = int(diff1/ 2.0)
             a = np.ones((diff1, image.shape[0]), dtype=np.int)
             a = a*255
             image = np.insert(image, 0, a, 1)
