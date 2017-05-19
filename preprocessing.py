@@ -133,7 +133,7 @@ def split_with_con_comp(img):
         if image.shape[1] < image.shape[0]:
             img_lst_new.append(image)
         else:
-            print('trying to split wide image')
+            # print('trying to split wide image')
 
             img_inv = np.logical_not(image)
             labels, n_labels = ndimage.label(img_inv)
@@ -141,9 +141,9 @@ def split_with_con_comp(img):
             sizes = ndimage.sum(mask, labels, range(n_labels + 1))
             ordered_labels = np.argsort(sizes)
             sz = [int(x) for x in sizes.tolist()[1:]]
-            print(sz)
+            # print(sz)
             ordered_labels = [i[0] for i in sorted(enumerate(sz), key=lambda x:x[1], reverse=True)]
-            print(ordered_labels)
+            # sprint(ordered_labels)
             label_i = 1
             components = []
             for i in range(1, n_labels + 1):
@@ -165,7 +165,7 @@ def split_with_con_comp(img):
                     label_i += 1
                     new_comp.label = label_i
                 components.append(new_comp)
-                print(new_comp.__dict__)
+                # print(new_comp.__dict__)
 
             min_max = [list([9999, 0])] * label_i
             for comp in components:
