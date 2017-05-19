@@ -17,9 +17,9 @@ def update_xml_boxes(im_path, im_file):
         for left_right in x_coords:
             boxes.append((left_right[0], top_bottom[i][0], left_right[1] - left_right[0], top_bottom[i][1] - top_bottom[i][0]))
 
-    xml = im_file.replace(".pgm", ".xml")
+    xml = im_file.replace(".pgm", "_updated.xml")
 
-    with open(os.path.join(im_path, xml), 'a') as f:
+    with open(os.path.join(im_path, xml), 'w') as f:
         for box in boxes:
 
             box = ['0' * (4 - len(str(i))) + str(i) for i in box]
