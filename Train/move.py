@@ -46,10 +46,10 @@ def main():
 def count():
     txt = ''
     total = 0
-    for dir in os.listdir('annotated_crops/original'):
+    for dir in os.listdir('annotated_crops/128_extended'):
         txt = txt+dir
         count = 0
-        pa = os.path.join('annotated_crops/original', dir)
+        pa = os.path.join('annotated_crops/128_extended', dir)
         for filename in os.listdir(pa):
             pat = os.path.join(pa, filename)
             if os.path.isfile(pat):
@@ -58,7 +58,7 @@ def count():
         txt = txt + ', ' + str(count) + '\n'
         
     print(total)
-    text_file = open("Occurences.txt", "w")
+    text_file = open("Occurences_extended.txt", "w")
     text_file.write(txt)
     text_file.close()
 

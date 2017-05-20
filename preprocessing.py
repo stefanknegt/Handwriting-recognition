@@ -383,7 +383,7 @@ def main():
             x = np.arange(len(h_hist))
             plt.plot(h_hist, x)
             fig.add_subplot(2, 1, 2)
-            plt.imshow(new_img, cmap=plt.cm.gray, vmin=0, vmax=1)
+            plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
 
     # calculate_sizes(new_list)
