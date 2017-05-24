@@ -8,8 +8,6 @@ TEST_SIZE = 1-TRAIN_SIZE
 def split():
     if not os.path.exists('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1) + '_train'):
         os.makedirs('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1) + '_train')
-    if not os.path.exists('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1) + '_test'):
-        os.makedirs('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1) + '_test')
 
     updir = '../data/Train/annotated_crops/128'
 
@@ -18,11 +16,13 @@ def split():
         leng = len([name for name in os.listdir(path) if os.path.isfile(path + '/'+ name)])
         if leng >= MINIMUM_INSTANCES:
             point = 0
+            # Just for Roger
+            #break_point = leng
             break_point = int(TRAIN_SIZE*leng)
             print(leng, break_point, leng-break_point)
             for filename in os.listdir(path):
                 src = os.path.join(path, filename)
-                if point < break_point:
+                if point <= break_point:
                     dst = '../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1) + '_train/'
                     dst = os.path.join(dst, dir)
                     if not os.path.exists(dst):
