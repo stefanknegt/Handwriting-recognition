@@ -3,15 +3,15 @@ import os
 MINIMUM_INSTANCES = 100
 
 def split():
-    if not os.path.exists('temp'):
-        os.makedirs('temp')
-    if not os.path.exists('train'):
-        os.makedirs('train')
-    if not os.path.exists('test'):
-        os.makedirs('test')
+    if not os.path.exists('../data/Train/temp'):
+        os.makedirs('../data/Train/temp')
+    if not os.path.exists('../data/Train/train'):
+        os.makedirs('../data/Train/train')
+    if not os.path.exists('../data/Train/test'):
+        os.makedirs('../data/Train/test')
 
-    for updir in os.listdir('128'):
-        path = os.path.join('128', updir)
+    for updir in os.listdir('../data/Train/128'):
+        path = os.path.join('../data/Train/128', updir)
         leng = len([name for name in os.listdir(path) if os.path.isfile(path + '/'+ name)])
         if len
         print len([name for name in os.listdir(path) if os.path.isfile(path + '/'+ name)])

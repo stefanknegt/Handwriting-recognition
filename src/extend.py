@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
+''''THIS FILE IS COMPELTELY DEPRECATED, USED FOR EXTENDING DATASET'''
+
 def main():
     count = 0
     for dir in os.listdir('.'):

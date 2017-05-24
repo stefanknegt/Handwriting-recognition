@@ -8,6 +8,8 @@ from PIL import Image
 
 DEBUG_3 = False
 
+'''THIS FILE IS DEPRECATED USED FOR MOVING FILES AND RESIZING, CODE STILL USEFULL FOR COPYING'''
+
 def read_pgm(filename, byteorder='>'):
     """Return image data from a raw PGM file as numpy array.
 

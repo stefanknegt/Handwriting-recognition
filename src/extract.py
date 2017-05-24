@@ -5,6 +5,8 @@ from PIL import Image
 from random import choice
 from string import ascii_uppercase
 
+'''THIS FILE IS COMPLETELY DEPRECATED, USED FOR EXTRACTING IMAGES FROM XML'''
+
 def read_pgm(filename, byteorder='>'):
     """Return image data from a raw PGM file as numpy array.
 

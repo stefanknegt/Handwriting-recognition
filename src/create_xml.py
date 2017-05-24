@@ -41,7 +41,7 @@ def update_xml_boxes(im_path, im_file):
 def main():
     # loop over all files in all lines+xml folders
     for i in range(1, 13): # 'for i range(1,13)' gets all folders
-        rel_path = os.path.relpath('Train/lines+xml/' + str(i) + '/')
+        rel_path = os.path.relpath('../data/Train/lines+xml/' + str(i) + '/')
         path = os.path.join(os.getcwd(), rel_path)
         files = os.listdir(path)
         print(path)

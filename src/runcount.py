@@ -13,7 +13,7 @@ print(face)"""
 
 threshold = 200
 
-img = misc.imread('Train/annotated_crops/4ea6/4ea6_AJGVLYWOIYHD.pgm')
+img = misc.imread('../data/Train/annotated_crops/4ea6/4ea6_AJGVLYWOIYHD.pgm')
 img = img.astype(int)
 
 print(type(np.unique(img)))
