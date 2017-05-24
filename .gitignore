@@ -1,2 +1,4 @@
 .idea/*
 Train/annotated_crops/128_extended/*
+Train/annotated_crops/train
+Train/annotated_crops/test
