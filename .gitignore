@@ -1,4 +1,5 @@
-.idea/*
+.idea
+lectures
 data/Train/annotated_crops/128_extended/*
 data/Train/annotated_crops/train
 data/Train/annotated_crops/test
