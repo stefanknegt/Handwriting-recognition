@@ -21,9 +21,12 @@ def main():
         threshold(10)
     if not os.path.exists('../data/Train/annotated_crops/128_over_99'):
         threshold(100)
-    train_test_evaluate(load_data('128_over_99'))
-    train_test_evaluate(load_data('128_over_9'))
-    train_test_evaluate(load_data('128'))
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_99')
+    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    tnum_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_9')
+    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128')
+    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 # define baseline model
 def baseline_model_MLP(num_classes, num_pixels):
