@@ -1,4 +1,6 @@
 .idea
+.idea/HWR.iml
+.idea/misc.xml
 lectures
 data/Train/annotated_crops/128_extended/*
 data/Train/annotated_crops/128_over_99_train

@@ -28,7 +28,7 @@ img_data_list=[]
 
 for dataset in data_dir_list:
 	img_list=os.listdir(data_path+'/'+ dataset)
-	print ('Loaded the images of dataset- '+'{}\n'.format(dataset))
+	print ('Loaded the images of dataset- '+'{}'.format(dataset))
 	for img in img_list:
 		input_img=cv2.imread(data_path + '/'+ dataset + '/'+ img )
 		input_img=cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
@@ -231,6 +231,8 @@ plt.style.use(['classic'])
 score = model.evaluate(X_test, y_test, show_accuracy=True, verbose=0)
 print('Test Loss:', score[0])
 print('Test accuracy:', score[1])
+
+model.save('CNN_R.h5')
 
 test_image = X_test[0:1]
 print (test_image.shape)
