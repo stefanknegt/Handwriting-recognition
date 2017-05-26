@@ -1,7 +1,7 @@
 import os
 from shutil import copyfile
 
-MINIMUM_INSTANCES = 10
+MINIMUM_INSTANCES = 100
 
 def threshold():
     if not os.path.exists('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1)):
