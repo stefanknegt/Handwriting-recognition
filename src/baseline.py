@@ -23,7 +23,7 @@ def main():
         threshold(100)
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_99')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    tnum_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_9')
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_9')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
