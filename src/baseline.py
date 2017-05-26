@@ -1,10 +1,12 @@
 import numpy as np
+import os
 
 import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from load_data import load_data
+from split_dataset import threshold
 
 
 
@@ -15,6 +17,10 @@ np.random.seed(seed)
 num_epoch = 10
 
 def main():
+    if not os.path.exists('../data/Train/annotated_crops/128_over_9'):
+        threshold(10)
+    if not os.path.exists('../data/Train/annotated_crops/128_over_99'):
+        threshold(100)
     train_test_evaluate(load_data('128_over_99'))
     train_test_evaluate(load_data('128_over_9'))
     train_test_evaluate(load_data('128'))

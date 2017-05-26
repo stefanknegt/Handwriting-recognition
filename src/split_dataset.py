@@ -3,7 +3,7 @@ from shutil import copyfile
 
 MINIMUM_INSTANCES = 100
 
-def threshold():
+def threshold(MINIMUM_INSTANCES):
     if not os.path.exists('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1)):
         os.makedirs('../data/Train/annotated_crops/128_over_' + str(MINIMUM_INSTANCES-1))
 
@@ -23,4 +23,4 @@ def threshold():
                 copyfile(src, dst)
 
 if __name__ == '__main__':
-    threshold()
+    threshold(MINIMUM_INSTANCES)
