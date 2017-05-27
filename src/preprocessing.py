@@ -58,8 +58,10 @@ def remove_table_lines(img, x, y):
     '''Removes horizontal or vertical table lines'''
     img_inv = np.logical_not(img)
     str_e = np.ones((x, y))
+    str_d = np.ones((x+2, y+2)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
     eroded = ndimage.binary_erosion(img_inv, structure=str_e).astype(img_inv.dtype)
-    recon_image = ndimage.binary_propagation(eroded, mask=img_inv)
+    # recon_image = ndimage.binary_propagation(eroded, mask=img_inv)
+    recon_image = ndimage.binary_dilation(eroded, structure=str_d).astype(eroded.dtype)
     recon_image = np.logical_not(recon_image)
     res = np.logical_not(img - recon_image)
     return res
@@ -304,7 +306,7 @@ def main():
     #     '../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
-    # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
