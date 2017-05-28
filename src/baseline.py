@@ -28,6 +28,7 @@ def main():
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
+
 # define baseline model
 def baseline_model_MLP(num_classes, num_pixels):
 	# create model

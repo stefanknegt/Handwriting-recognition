@@ -32,6 +32,8 @@ def load_data(folder):
     img_data /= 255
     print (img_data.shape)
 
+
+
     # Add ONE channel
     if num_channel == 1:
         if K.image_data_format() == 'channels_first':
@@ -44,6 +46,7 @@ def load_data(folder):
         if K.image_data_format() == 'channels_first':
             img_data = np.rollaxis(img_data, 3, 1)
             print (img_data.shape)
+
 
     num_of_samples = img_data.shape[0]
     labels = np.ones((num_of_samples,), dtype='int64')
@@ -63,10 +66,36 @@ def load_data(folder):
     # convert class labels to on-hot encoding
     Y = np_utils.to_categorical(labels, num_classes)
 
-    #Shuffle the dataset
+    #Shuffle the dataset -- DOESN'T WORK WITH VERY LARGE SETS MEMORY ERROR
     x,y = shuffle(img_data,Y, random_state=2)
-    # Split the dataset
+
+    '''
+    # Hopely this shuffle does work with large data
+    def shuffle_in_unison(a, b):
+        s = np.arange(a.shape[0])
+        s = np.random.permutation(s)
+        x = a[s]
+        y = b[s]
+        return x, y
+    x, y = shuffle_in_unison(img_data,Y)
+    '''
+
+
+    # Split the dataset -- DOESN't WORK WITH VERY LARGE SETS MEMORY ERROR
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=2)
+
+    '''
+    # Hopeful that dis does work
+    # test_proportion of 3 means 1/5 so 20% test and 80% train
+    def split(matrix, target, test_proportion):
+        ratio = matrix.shape[0] / test_proportion
+        X_train = matrix[ratio:, :]
+        X_test = matrix[:ratio, :]
+        Y_train = target[ratio:, :]
+        Y_test = target[:ratio, :]
+        return X_train, X_test, Y_train, Y_test
+    X_train, X_test, y_train, y_test = split(x, y, 5)
+    '''
 
     # Defining the model
     input_shape = img_data[0].shape
