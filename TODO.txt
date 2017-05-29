@@ -1,9 +1,11 @@
-Segmentation: Tim, Denny
-Feature Extraction: Stefan, Rogier
+- 2 netwerken
+	- Eerste netwerk voor classes waar we meer dan 100 examples voor hebben
+	- Indien softmax activatie < threshold, tweede netwerk voor overige classes
 
-Classification
-Auto-encoder
+- Iets bedenken om tweede netwerk meer discriminative power te geven
 
-Progress presentation
+- Manier vinden om netwerken te trainen (pallas, peregrine o.i.d.) 
 
-Greymaps > Bitmaps
+- Draft report afmaken
+
+- RICA of Autoencoder mogelijkheid onderzoeken
