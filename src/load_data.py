@@ -4,16 +4,26 @@ from sklearn.cross_validation import train_test_split
 from keras.utils import np_utils
 from keras import backend as K
 import numpy as np
+from pandas import DataFrame as DF
 
 K.set_image_data_format('channels_first')
+DEBUG = True
 
-def load_data(folder):
+def load_data_internal(folder):
+    data_path = os.path.join('../data/Train/annotated_crops', folder)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path)
+    return num_classes, input_shape, X_train, y_train, X_test, y_test
+
+def load_data_external(folder):
+    data_path = os.path.join('E:/Documenten/Studie/Master/HWR', folder)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path)
+    return num_classes, input_shape, X_train, y_train, X_test, y_test
+
+def load_data(data_path):
     # Define data path
-    data_path = os.path.join('../data/Train/annotated_crops',folder)
     data_dir_list = os.listdir(data_path)
     num_classes = len(data_dir_list)
     num_channel=1
-
 
     # Load data from dir above
     img_data_list=[]
@@ -31,8 +41,6 @@ def load_data(folder):
     img_data = img_data.astype('float32')
     img_data /= 255
     print (img_data.shape)
-
-
 
     # Add ONE channel
     if num_channel == 1:
@@ -66,25 +74,19 @@ def load_data(folder):
     # convert class labels to on-hot encoding
     Y = np_utils.to_categorical(labels, num_classes)
 
+
     #Shuffle the dataset -- DOESN'T WORK WITH VERY LARGE SETS MEMORY ERROR
-    x,y = shuffle(img_data,Y, random_state=2)
+    #x,y = shuffle(img_data,Y, random_state=2)
 
-    '''
-    # Hopely this shuffle does work with large data
-    def shuffle_in_unison(a, b):
-        s = np.arange(a.shape[0])
-        s = np.random.permutation(s)
-        x = a[s]
-        y = b[s]
-        return x, y
-    x, y = shuffle_in_unison(img_data,Y)
-    '''
-
+    # Scary unison shuffle!
+    rng_state = np.random.get_state()
+    np.random.shuffle(img_data)
+    np.random.set_state(rng_state)
+    np.random.shuffle(Y)
 
     # Split the dataset -- DOESN't WORK WITH VERY LARGE SETS MEMORY ERROR
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=2)
+    #X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=2)
 
-    '''
     # Hopeful that dis does work
     # test_proportion of 3 means 1/5 so 20% test and 80% train
     def split(matrix, target, test_proportion):
@@ -94,10 +96,9 @@ def load_data(folder):
         Y_train = target[ratio:, :]
         Y_test = target[:ratio, :]
         return X_train, X_test, Y_train, Y_test
-    X_train, X_test, y_train, y_test = split(x, y, 5)
-    '''
+    X_train, X_test, y_train, y_test = split(img_data, Y, 5)
 
     # Defining the model
-    input_shape = img_data[0].shape
+    input_shape = X_train[0].shape
 
     return num_classes, input_shape, X_train, y_train, X_test, y_test

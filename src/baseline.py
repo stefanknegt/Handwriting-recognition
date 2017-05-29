@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from load_data import load_data
+from load_data import load_data_internal, load_data_external
 from split_dataset import threshold
 
 
@@ -14,19 +14,26 @@ from split_dataset import threshold
 seed = 7
 np.random.seed(seed)
 
-num_epoch = 10
+num_epoch = 20
 
 def main():
     if not os.path.exists('../data/Train/annotated_crops/128_over_9'):
         threshold(10)
     if not os.path.exists('../data/Train/annotated_crops/128_over_99'):
         threshold(100)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_99')
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_99')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128_over_9')
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data('128')
+
+def augmented():
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_20')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 
 # define baseline model
@@ -62,10 +69,10 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     model = baseline_model_CNN(num_classes, input_shape)
     model.summary()
     # Fit the model
-    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=200, verbose=2)
+    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
 
     # Final evaluation of the model
-    score = model.evaluate(X_test, y_test, batch_size=100, verbose=0)
+    score = model.evaluate(X_test, y_test, batch_size=50, verbose=0)
     print('Test Loss:', score[0])
     print('Test accuracy:', score[1])
     print("Baseline Error: %.2f%%" % (100-score[1]*100))

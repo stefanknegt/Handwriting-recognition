@@ -11,12 +11,12 @@ datagen = ImageDataGenerator(
 
 TIMES = 10
 orig = '../data/Train/annotated_crops/128'
-new = '../data/Train/annotated_crops/128_times_'+str(TIMES)
+new = 'E:/Documenten/Studie/Master/HWR/128_times_'+str(TIMES)
 if not os.path.exists(new):
     os.makedirs(new)
 for dir in os.listdir(orig):
-    if 'Wrd' in dir:
-        pass
+    if 'Wrd' in str(dir):
+        print('NOT PROCESSING: '+ str(dir))
     else:
         print('Processing dir: '+ str(dir))
         path_orig = os.path.join(orig, dir)
