@@ -47,17 +47,22 @@ def load_and_shuffle(data_path):
     num_classes = len(data_dir_list)
     num_channel = 1
 
+    invalid_ims = [0] * num_classes
     # Load data from dir above
     img_data_list = []
-
+    j = 0
     for dataset in data_dir_list:
         img_list = os.listdir(data_path + '/' + dataset)
         print ('Loaded the images of dataset- ' + '{}'.format(dataset))
         for img in img_list:
             input_img = cv2.imread(data_path + '/' + dataset + '/' + img)
-            #input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-            #input_img_resize = cv2.resize(input_img, (128, 128))
-            img_data_list.append(input_img)
+            try:
+                input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+                input_img_resize = cv2.resize(input_img, (128, 128))
+                img_data_list.append(input_img)
+            except cv2.error:
+                invalid_ims[j] += 1
+        j += 1
 
     img_data = np.array(img_data_list)
     img_data = img_data.astype('float32')
@@ -87,9 +92,9 @@ def load_and_shuffle(data_path):
     for dataset in data_dir_list:
         names.append(dataset)
         img_list = os.listdir(data_path + '/' + dataset)
-        for img in img_list:
+        for i in range(len(img_list) - invalid_ims[j]):
             labels[i] = j
-            i += 1
+            #i += 1
         j += 1
 
     # convert class labels to on-hot encoding
