@@ -1,5 +1,5 @@
 import numpy as np
-import os
+import os, sys
 
 import matplotlib.pyplot as plt
 from keras.models import Sequential
@@ -23,10 +23,10 @@ def main():
         threshold(100)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_99')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9')
-    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
-    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 def augmented():
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
@@ -77,7 +77,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     print('Test accuracy:', score[1])
     print("Baseline Error: %.2f%%" % (100-score[1]*100))
 
-    model.save('baseline'+str(num_classes)+'.h5')
+    model.save('baseline'+str(X_train.shape[0])+'.h5')
 
     # visualizing losses and accuracy
     train_loss=hist.history['loss']
@@ -91,7 +91,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     plt.plot(xc,val_loss)
     plt.xlabel('num of Epochs')
     plt.ylabel('loss')
-    plt.title('train_loss vs val_loss ('+str(num_classes)+')')
+    plt.title('train_loss vs val_loss ('+str(X_train.shape[0])+')')
     plt.grid(True)
     plt.legend(['train','val'])
     #print plt.style.available # use bmh, classic,ggplot for big pictures
@@ -102,11 +102,18 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     plt.plot(xc,val_acc)
     plt.xlabel('num of Epochs')
     plt.ylabel('accuracy')
-    plt.title('train_acc vs val_acc ('+str(num_classes)+')')
+    plt.title('train_acc vs val_acc ('+str(X_train.shape[0])+')')
     plt.grid(True)
     plt.legend(['train','val'],loc=4)
     plt.show()
     #print plt.style.available # use bmh, classic,ggplot for big pictures
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv)!=2:
+        augmented(False)
+    elif sys.argv[1]==1:
+        augmented(True)
+    else:
+        augmented(False)
+
+    augmented()
