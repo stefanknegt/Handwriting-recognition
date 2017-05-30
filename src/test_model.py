@@ -3,7 +3,10 @@ import numpy as np
 import os
 
 from keras import backend as K
-K.set_image_data_format('channels_first')
+if K.backend()=='tensorflow':
+    K.set_image_data_format('channels_last')
+else:
+    K.set_image_data_format('channels_first')
 
 from keras.models import load_model
 

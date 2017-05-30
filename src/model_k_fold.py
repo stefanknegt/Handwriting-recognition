@@ -6,7 +6,10 @@ from keras.models import Sequential
 from keras.utils import np_utils
 from keras import backend as K
 from load_data import load_data_internal, load_data_external
-K.set_image_data_format('channels_first')
+if K.backend()=='tensorflow':
+    K.set_image_data_format('channels_last')
+else:
+    K.set_image_data_format('channels_first')
 PLOT = False
 num_epoch = 10
 

@@ -7,7 +7,6 @@ try:
     from skimage import filters
 except ImportError:
     from skimage import filter as filters
-from skimage import exposure
 
 BINARY_TH = 200  # binary threshold
 NOISE_SIZE_TH = 3  # threshold for what size counts as noise
@@ -16,7 +15,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
-DEBUG = True
+DEBUG = False
 
 def binarize(img):
     '''turns gray scale image into binary based on threshold'''
@@ -240,11 +239,9 @@ def sizes(image, rotate, output):
             if diff0%2!=0:
                 diff0 += 1
                 a = np.ones((1, image.shape[0]), dtype=np.int)
-                a = a * 255
                 image = np.insert(image, 0, a, 1)
             diff0 = int(diff0/ 2.0)
             a = np.ones((diff0, image.shape[1]), dtype=np.int)
-            a = a*255
             image = np.insert(image, 0, a, 0)
             image = np.concatenate((image, a), axis=0)
 
@@ -255,39 +252,33 @@ def sizes(image, rotate, output):
             if diff1%2!=0:
                 diff1 += 1
                 a = np.ones((1, image.shape[1]), dtype=np.int)
-                a = a * 255
                 image = np.insert(image, 0, a, 0)
             diff1 = int(diff1/ 2.0)
             a = np.ones((diff1, image.shape[0]), dtype=np.int)
-            a = a*255
             image = np.insert(image, 0, a, 1)
             a = np.ones((image.shape[0], diff1), dtype=np.int)
-            a = a*255
             image = np.concatenate((image, a), axis=1)
 
         if DEBUG:
             fig.add_subplot(3,1,2)
             plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
 
-        ''' ERROR!! '''
-        new_image = misc.imresize(image, (output-int(2*edge), output-int(2*edge)), interp='nearest')
-        a = np.ones((edge, new_image.shape[0]), dtype=np.int)
-        a = a * 255
-        new_image = np.insert(new_image, 0, a, 1)
-        a = np.ones((new_image.shape[0], edge), dtype=np.int)
-        a = a * 255
-        new_image = np.concatenate((new_image, a), axis=1)
-        a = np.ones((edge, new_image.shape[1]), dtype=np.int)
-        a = a * 255
-        new_image = np.insert(new_image, 0, a, 0)
-        new_image = np.concatenate((new_image, a), axis=0)
+    ''' ERROR!! '''
+    new_image = misc.imresize(image, (output-int(2*edge), output-int(2*edge)), interp='nearest')
+    a = np.ones((edge, new_image.shape[0]), dtype=np.int)
+    new_image = np.insert(new_image, 0, a, 1)
+    a = np.ones((new_image.shape[0], edge), dtype=np.int)
+    new_image = np.concatenate((new_image, a), axis=1)
+    a = np.ones((edge, new_image.shape[1]), dtype=np.int)
+    new_image = np.insert(new_image, 0, a, 0)
+    new_image = np.concatenate((new_image, a), axis=0)
 
-        if DEBUG:
-            fig.add_subplot(3,1,3)
-            plt.imshow(new_image, cmap=plt.cm.gray, vmin=0, vmax=1)
-            plt.show()
+    if DEBUG:
+        fig.add_subplot(3,1,3)
+        plt.imshow(new_image, cmap=plt.cm.gray, vmin=0, vmax=1)
+        plt.show()
 
-        return new_image
+    return new_image
 
 
 def preprocess_img(img):

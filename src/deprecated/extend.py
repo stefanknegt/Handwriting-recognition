@@ -6,9 +6,9 @@ from PIL import Image
 
 ''''THIS FILE IS COMPELTELY DEPRECATED, USED FOR EXTENDING DATASET'''
 
-def main():
+def extend():
     count = 0
-    for dir in os.listdir('.'):
+    for dir in os.listdir('../../data/'):
         if 'Chinese' in dir:
             suffix = dir.replace("Chinese-unicode-chars-", '')
             #print(suffix)
@@ -20,9 +20,9 @@ def main():
                 img = misc.imread(pat)
                 image = misc.imresize(img, (128, 128), interp='nearest')
                 im = Image.fromarray(image.astype(np.uint8))
-                if not os.path.exists('Train/annotated_crops/128_extended/' + unicode):
-                    os.makedirs('Train/annotated_crops/128_extended/' + unicode)
-                im.save('Train/annotated_crops/128_extended/' + unicode + '/' + unicode + '_' + suffix + '.pgm')
+                if not os.path.exists('../../Train/annotated_crops/128_bit_extended/' + unicode):
+                    os.makedirs('../../Train/annotated_crops/128_bit_extended/' + unicode)
+                im.save('../../Train/annotated_crops/128_extended/' + unicode + '/' + unicode + '_' + suffix + '.pgm')
                 count += 1
             print('files processed: ', count)
 
@@ -32,8 +32,7 @@ def lowercase_rename( dir ):
     def rename_all( root, items):
         for name in items:
             try:
-                os.rename( os.path.join(root, name),
-                                    os.path.join(root, name.lower()))
+                os.rename( os.path.join(root, name), os.path.join(root, name.lower()))
             except OSError:
                 pass # can't rename it, so what
 
@@ -44,5 +43,5 @@ def lowercase_rename( dir ):
 
 
 if __name__ == '__main__':
-    #lowercase_rename("Train/annotated_crops/128")
-    main()
+    lowercase_rename("../../data/Train/annotated_crops/128_bit")
+    #extend()
