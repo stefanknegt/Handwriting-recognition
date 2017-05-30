@@ -1,10 +1,7 @@
 import os, cv2
-from sklearn.utils import shuffle
-from sklearn.cross_validation import train_test_split
 from keras.utils import np_utils
 from keras import backend as K
 import numpy as np
-from pandas import DataFrame as DF
 
 K.set_image_data_format('channels_first')
 DEBUG = True

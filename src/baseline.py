@@ -2,49 +2,24 @@ import os
 import sys
 
 import matplotlib.pyplot as plt
-import numpy as np
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential
 
 from load_data import load_data_external
-from src.deprecated.split_dataset import threshold
 
-# fix random seed for reproducibility
-seed = 7
-np.random.seed(seed)
 
 num_epoch = 20
 
 def main():
-    if not os.path.exists('../data/Train/annotated_crops/128_over_9'):
-        threshold(10)
-    if not os.path.exists('../data/Train/annotated_crops/128_over_99'):
-        threshold(100)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_99')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-
-def augmented():
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_20')
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-
-
-# define baseline model
-def baseline_model_MLP(num_classes, num_pixels):
-	# create model
-	model = Sequential()
-	model.add(Dense(num_pixels, input_dim=num_pixels, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
 
 # Define baseline CNN model
 def baseline_model_CNN(num_classes, input_shape):
@@ -77,7 +52,10 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     print('Test accuracy:', score[1])
     print("Baseline Error: %.2f%%" % (100-score[1]*100))
 
-    model.save('baseline'+str(X_train.shape[0])+'.h5')
+    i = 0
+    while os.path.exists('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5'):
+        i+=1
+    model.save('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5')
 
     # visualizing losses and accuracy
     train_loss=hist.history['loss']
@@ -109,11 +87,4 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     #print plt.style.available # use bmh, classic,ggplot for big pictures
 
 if __name__ == '__main__':
-    if len(sys.argv)!=2:
-        augmented(False)
-    elif sys.argv[1]==1:
-        augmented(True)
-    else:
-        augmented(False)
-
-    augmented()
+    main()
