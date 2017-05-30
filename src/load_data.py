@@ -28,12 +28,11 @@ def load_data(data_path):
     img_data_list=[]
 
     for dataset in data_dir_list:
-        img_list=os.listdir(data_path+'/'+ dataset)
+        img_list=os.path.join(data_path, dataset)
         print ('Loaded the images of dataset- '+'{}'.format(dataset))
-        for img in img_list:
-            input_img=cv2.imread(data_path + '/'+ dataset + '/'+ img, flags=0)
-            #input_img=cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-            #input_img_resize=cv2.resize(input_img,(128,128))
+        for img in os.listdir(img_list):
+            img_path = os.path.join(img_list, img)
+            input_img=cv2.imread(img_path, flags=0)
             img_data_list.append(input_img)
 
     img_data = np.array(img_data_list)
@@ -65,9 +64,8 @@ def load_data(data_path):
     for dataset in data_dir_list:
         names.append(dataset)
         img_list = os.listdir(data_path + '/' + dataset)
-        for img in img_list:
+        for i in range(len(img_list)):
             labels[i] = j
-            i += 1
         j += 1
 
     # convert class labels to on-hot encoding

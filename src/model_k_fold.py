@@ -52,13 +52,12 @@ def load_and_shuffle(data_path):
     img_data_list = []
     j = 0
     for dataset in data_dir_list:
-        img_list = os.listdir(data_path + '/' + dataset)
+        img_list = os.path.join(data_path, dataset)
         print ('Loaded the images of dataset- ' + '{}'.format(dataset))
-        for img in img_list:
-            input_img = cv2.imread(data_path + '/' + dataset + '/' + img)
+        for img in os.listdir(img_list):
+            img_path = os.path.join(img_list, img)
+            input_img = cv2.imread(img_path, flags=0)
             try:
-                input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-                input_img_resize = cv2.resize(input_img, (128, 128))
                 img_data_list.append(input_img)
             except cv2.error:
                 invalid_ims[j] += 1
@@ -94,7 +93,6 @@ def load_and_shuffle(data_path):
         img_list = os.listdir(data_path + '/' + dataset)
         for i in range(len(img_list) - invalid_ims[j]):
             labels[i] = j
-            #i += 1
         j += 1
 
     # convert class labels to on-hot encoding

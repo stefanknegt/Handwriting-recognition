@@ -5,7 +5,7 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential
 from load_data import load_data_internal, load_data_external
 
-PLOT = False
+PLOT = True
 num_epoch = 20
 
 def main():
@@ -17,7 +17,9 @@ def main():
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_bin_times_10')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 # Define baseline CNN model
@@ -64,7 +66,8 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         val_acc=hist.history['val_acc']
         xc=range(num_epoch)
 
-        plt.figure(1,figsize=(7,5))
+        f = plt.figure(1,figsize=(7,5))
+        plt.subplot(21)
         plt.plot(xc,train_loss)
         plt.plot(xc,val_loss)
         plt.xlabel('num of Epochs')
@@ -75,7 +78,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         #print plt.style.available # use bmh, classic,ggplot for big pictures
         plt.style.use(['classic'])
 
-        plt.figure(2,figsize=(7,5))
+        plt.subplot(22)
         plt.plot(xc,train_acc)
         plt.plot(xc,val_acc)
         plt.xlabel('num of Epochs')
@@ -83,7 +86,8 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         plt.title('train_acc vs val_acc ('+str(X_train.shape[0])+')')
         plt.grid(True)
         plt.legend(['train','val'],loc=4)
-        plt.show()
+        plt.savefig('baseline' + str(X_train.shape[0]) + '_' + str(i) + 'accuracy.png')
+        plt.close(f)
         #print plt.style.available # use bmh, classic,ggplot for big pictures
 
 if __name__ == '__main__':
