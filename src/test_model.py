@@ -15,8 +15,10 @@ img_data = img_data.astype('float32')
 img_data /= 255
 if K.image_data_format() == 'channels_first':
     img_data = np.expand_dims(img_data, axis=0)
+    img_data = np.expand_dims(img_data, axis=0)
     print (img_data.shape)
 else:
+    img_data = np.expand_dims(img_data, axis=2)
     img_data = np.expand_dims(img_data, axis=2)
     print (img_data.shape)
 test_image = img_data
