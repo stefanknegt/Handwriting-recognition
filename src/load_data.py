@@ -36,8 +36,9 @@ def load_data(data_path):
             img_data_list.append(input_img)
 
     img_data = np.array(img_data_list)
-    img_data = img_data.astype('float32')
-    img_data /= 255
+    if not '_bin_' in data_path:
+        img_data = img_data.astype('float32')
+        img_data /= 255
     print (img_data.shape)
 
     # Add ONE channel
