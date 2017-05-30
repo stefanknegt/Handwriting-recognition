@@ -6,11 +6,17 @@ K.set_image_data_format('channels_first')
 
 from keras.models import load_model
 
-input_img=cv2.imread('')
+input_img=cv2.imread('../data/Train/annotated_crops/128/40e3/')
 input_img=cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
 input_img_resize=cv2.resize(input_img,(128,128))
-np.expand_dims(input_img_resize, axis=1)
-test_image = input_img_resize
+
+img_data = np.array(input_img_resize)
+img_data = img_data.astype('float32')
+img_data /= 255
+np.expand_dims(img_data, axis=1)
+test_image = img_data
+
+
 
 model = load_model('baseline621.h5')
 
