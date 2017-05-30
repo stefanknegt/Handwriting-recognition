@@ -8,23 +8,15 @@ from keras import backend as K
 from load_data import load_data_internal, load_data_external
 K.set_image_data_format('channels_first')
 PLOT = False
-
-# fix random seed for reproducibility
-#seed = 7
-#np.random.seed(seed)
-
-num_epoch = 20
+num_epoch = 10
 
 def main(folder, fold):
-    #if not os.path.exists('../data/Train/annotated_crops/128_over_9'):
-    #    threshold(10)
-    #if not os.path.exists('../data/Train/annotated_crops/128_over_99'):
-    #    threshold(100)
     if fold is 0 or fold is 1:
         print('No clear fold given, run once with 80% Train, 20% Test')
         num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal(folder)
         acc = train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, 1)
     else:
+        print('Training Baseline_model with '+str(fold)+' folds')
         accuracy = np.zeros(fold)
         num_classes, input_shape, img_data, Y = load_and_shuffle_internal(folder)
         for i in range(0, fold):
@@ -38,13 +30,13 @@ def main(folder, fold):
 
 def load_and_shuffle_internal(folder):
     data_path = os.path.join('../data/Train/annotated_crops', folder)
-    num_classes, input_shape, data = load_and_shuffle(data_path)
-    return num_classes, input_shape, data
+    num_classes, input_shape, img_data, Y = load_and_shuffle(data_path)
+    return num_classes, input_shape, img_data, Y
 
 def load_and_shuffle_external(folder):
     data_path = os.path.join('E:/Documenten/Studie/Master/HWR', folder)
-    num_classes, input_shape, data = load_and_shuffle(data_path)
-    return num_classes, input_shape, data
+    num_classes, input_shape, img_data, Y = load_and_shuffle(data_path)
+    return num_classes, input_shape, img_data, Y
 
 def load_and_shuffle(data_path):
     # Define data path
@@ -67,20 +59,19 @@ def load_and_shuffle(data_path):
     img_data = np.array(img_data_list)
     img_data = img_data.astype('float32')
     img_data /= 255
-    print (img_data.shape)
 
     # Add ONE channel
     if num_channel == 1:
         if K.image_data_format() == 'channels_first':
             img_data = np.expand_dims(img_data, axis=1)
-            print (img_data.shape)
+            #print (img_data.shape)
         else:
             img_data = np.expand_dims(img_data, axis=4)
-            print (img_data.shape)
+            #print (img_data.shape)
     else:
         if K.image_data_format() == 'channels_first':
             img_data = np.rollaxis(img_data, 3, 1)
-            print (img_data.shape)
+            #print (img_data.shape)
 
     # Label creation
     num_of_samples = img_data.shape[0]
@@ -113,8 +104,8 @@ def load_and_shuffle(data_path):
 
 def k_fold(img_data, Y, fold, i):
     ratio = img_data.shape[0] / fold
-    X_train = np.append(img_data[0:i*ratio,:],img_data[ratio+i*ratio:img_data.shape[0],:])
-    y_train = np.append(Y[0:i*ratio,:],Y[ratio+i*ratio:Y.shape[0],:])
+    X_train = np.append(img_data[0:i*ratio,:],img_data[ratio+i*ratio:img_data.shape[0],:]).reshape(img_data.shape[0]-ratio, img_data.shape[1], img_data.shape[2], img_data.shape[3])
+    y_train = np.append(Y[0:i*ratio,:],Y[ratio+i*ratio:Y.shape[0],:]).reshape(Y.shape[0]-ratio, Y.shape[1])
     X_test = img_data[i*ratio:ratio+i*ratio, :]
     y_test = Y[i*ratio:ratio+i*ratio, :]
     return X_train, y_train, X_test, y_test
@@ -140,7 +131,10 @@ def baseline_model_CNN(num_classes, input_shape):
 
 def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, fold):
     model = baseline_model_CNN(num_classes, input_shape)
+    print('Model Summary: ')
     model.summary()
+
+    print('Start training...')
     # Fit the model
     hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
 
@@ -189,9 +183,9 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     return score[1]
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
+    if len(sys.argv) == 3:
+        main(sys.argv[1], int(sys.argv[2]))
     else:
-        print("Please give as argument 1, a string of the folder, '128' is an example")
+        print("Please give as argument 1, the folder, 128_over_9 is an example")
         print("Please give as argument 2, an int for the number of folds, 10 is used usually")
-        print("So a correct call would be: python model_k_fold '128' 10")
+        print("So a correct call would be: python model_k_fold 128_over_9 10")

@@ -1,14 +1,11 @@
-import os
-import sys
-
+import os, sys
 import matplotlib.pyplot as plt
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential
+from load_data import load_data_internal, load_data_external
 
-from load_data import load_data_external
-
-
+PLOT = False
 num_epoch = 20
 
 def main():
@@ -16,10 +13,10 @@ def main():
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 # Define baseline CNN model
 def baseline_model_CNN(num_classes, input_shape):
@@ -57,34 +54,35 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         i+=1
     model.save('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5')
 
-    # visualizing losses and accuracy
-    train_loss=hist.history['loss']
-    val_loss=hist.history['val_loss']
-    train_acc=hist.history['acc']
-    val_acc=hist.history['val_acc']
-    xc=range(num_epoch)
+    if PLOT:
+        # visualizing losses and accuracy
+        train_loss=hist.history['loss']
+        val_loss=hist.history['val_loss']
+        train_acc=hist.history['acc']
+        val_acc=hist.history['val_acc']
+        xc=range(num_epoch)
 
-    plt.figure(1,figsize=(7,5))
-    plt.plot(xc,train_loss)
-    plt.plot(xc,val_loss)
-    plt.xlabel('num of Epochs')
-    plt.ylabel('loss')
-    plt.title('train_loss vs val_loss ('+str(X_train.shape[0])+')')
-    plt.grid(True)
-    plt.legend(['train','val'])
-    #print plt.style.available # use bmh, classic,ggplot for big pictures
-    plt.style.use(['classic'])
+        plt.figure(1,figsize=(7,5))
+        plt.plot(xc,train_loss)
+        plt.plot(xc,val_loss)
+        plt.xlabel('num of Epochs')
+        plt.ylabel('loss')
+        plt.title('train_loss vs val_loss ('+str(X_train.shape[0])+')')
+        plt.grid(True)
+        plt.legend(['train','val'])
+        #print plt.style.available # use bmh, classic,ggplot for big pictures
+        plt.style.use(['classic'])
 
-    plt.figure(2,figsize=(7,5))
-    plt.plot(xc,train_acc)
-    plt.plot(xc,val_acc)
-    plt.xlabel('num of Epochs')
-    plt.ylabel('accuracy')
-    plt.title('train_acc vs val_acc ('+str(X_train.shape[0])+')')
-    plt.grid(True)
-    plt.legend(['train','val'],loc=4)
-    plt.show()
-    #print plt.style.available # use bmh, classic,ggplot for big pictures
+        plt.figure(2,figsize=(7,5))
+        plt.plot(xc,train_acc)
+        plt.plot(xc,val_acc)
+        plt.xlabel('num of Epochs')
+        plt.ylabel('accuracy')
+        plt.title('train_acc vs val_acc ('+str(X_train.shape[0])+')')
+        plt.grid(True)
+        plt.legend(['train','val'],loc=4)
+        plt.show()
+        #print plt.style.available # use bmh, classic,ggplot for big pictures
 
 if __name__ == '__main__':
     main()
