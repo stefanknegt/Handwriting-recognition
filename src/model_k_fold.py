@@ -1,14 +1,12 @@
-import numpy as np
-import os, sys
+import sys
 
 import matplotlib.pyplot as plt
-from keras.models import Sequential
+import numpy as np
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.models import Sequential
+
 from load_data import load_data_internal, load_data_external
-from split_dataset import threshold
-
-
 
 # fix random seed for reproducibility
 seed = 7
