@@ -47,7 +47,6 @@ def extract(fullpath, filename):
     utf = '<utf> '
     wrd = 'Wrd_'
     for line in lines:
-        print('Handling: ' + str(line))
         xlo = line.find(x) + len(x)
         ylo = line.find(y) + len(y)
         hlo = line.find(h) + len(h)

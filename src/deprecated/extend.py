@@ -43,5 +43,5 @@ def lowercase_rename( dir ):
 
 
 if __name__ == '__main__':
-    lowercase_rename("../../data/Train/annotated_crops/128_bit")
+    lowercase_rename("../../data/Train/annotated_crops/128_bin")
     #extend()

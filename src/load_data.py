@@ -3,8 +3,10 @@ from keras.utils import np_utils
 from keras import backend as K
 import numpy as np
 
-K.set_image_data_format('channels_first')
-DEBUG = True
+if K.backend()=='tensorflow':
+    K.set_image_data_format('channels_last')
+else:
+    K.set_image_data_format('channels_first')
 
 def load_data_internal(folder):
     data_path = os.path.join('../data/Train/annotated_crops', folder)
@@ -29,10 +31,10 @@ def load_data(data_path):
         img_list=os.listdir(data_path+'/'+ dataset)
         print ('Loaded the images of dataset- '+'{}'.format(dataset))
         for img in img_list:
-            input_img=cv2.imread(data_path + '/'+ dataset + '/'+ img )
-            input_img=cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-            input_img_resize=cv2.resize(input_img,(128,128))
-            img_data_list.append(input_img_resize)
+            input_img=cv2.imread(data_path + '/'+ dataset + '/'+ img, flags=0)
+            #input_img=cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+            #input_img_resize=cv2.resize(input_img,(128,128))
+            img_data_list.append(input_img)
 
     img_data = np.array(img_data_list)
     img_data = img_data.astype('float32')

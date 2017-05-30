@@ -13,10 +13,12 @@ def main():
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
-    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
+    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 # Define baseline CNN model
 def baseline_model_CNN(num_classes, input_shape):

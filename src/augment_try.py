@@ -10,27 +10,25 @@ datagen = ImageDataGenerator(
         fill_mode='nearest')
 
 TIMES = 10
-orig = '../data/Train/annotated_crops/128'
-new = 'E:/Documenten/Studie/Master/HWR/128_times_'+str(TIMES)
+orig = '../data/Train/annotated_crops/128_bin'
+new = 'E:/Documenten/Studie/Master/HWR/128_bin_times_'+str(TIMES)
 if not os.path.exists(new):
     os.makedirs(new)
 for dir in os.listdir(orig):
-    if 'Wrd' in str(dir):
-        print('NOT PROCESSING: '+ str(dir))
-    else:
-        print('Processing dir: '+ str(dir))
-        path_orig = os.path.join(orig, dir)
-        path_new = os.path.join(new, dir)
-        if not os.path.exists(path_new):
-            os.makedirs(path_new)
-        for filename in os.listdir(path_orig):
-            path_long = os.path.join(path_orig, filename)
-            img = load_img(path_long)  # PIL image
-            x = img_to_array(img)  # Numpy array (1,128,128)
-            x = x.reshape((1,) + x.shape)  # Numpy array (1,1,128,128)
+    #print('Processing dir: '+ str(dir))
+    path_orig = os.path.join(orig, dir)
+    path_new = os.path.join(new, dir)
+    if not os.path.exists(path_new):
+        os.makedirs(path_new)
+    for filename in os.listdir(path_orig):
+        path_long = os.path.join(path_orig, filename)
+        img = load_img(path_long)  # PIL image
+        x = img_to_array(img)  # Numpy array (1,128,128)
+        x = x.reshape((1,) + x.shape)  # Numpy array (1,1,128,128)
 
-            i = 0
-            for batch in datagen.flow(x, batch_size=1, save_to_dir=path_new, save_prefix=dir, save_format='pgm'):
-                i +=1
-                if i>=TIMES:
-                    break
+        i = 0
+        for batch in datagen.flow(x, batch_size=1, save_to_dir=path_new, save_prefix=dir, save_format='pgm'):
+            i +=1
+            if i>=TIMES:
+                break
+print("Done, you've got some new files!")

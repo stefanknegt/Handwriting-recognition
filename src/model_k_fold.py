@@ -55,9 +55,9 @@ def load_and_shuffle(data_path):
         print ('Loaded the images of dataset- ' + '{}'.format(dataset))
         for img in img_list:
             input_img = cv2.imread(data_path + '/' + dataset + '/' + img)
-            input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-            input_img_resize = cv2.resize(input_img, (128, 128))
-            img_data_list.append(input_img_resize)
+            #input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+            #input_img_resize = cv2.resize(input_img, (128, 128))
+            img_data_list.append(input_img)
 
     img_data = np.array(img_data_list)
     img_data = img_data.astype('float32')
