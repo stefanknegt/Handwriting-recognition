@@ -53,7 +53,7 @@ def load_and_shuffle(data_path):
     j = 0
     for dataset in data_dir_list:
         img_list = os.path.join(data_path, dataset)
-        print ('Loaded the images of dataset- ' + '{}'.format(dataset))
+        # print ('Loaded the images of dataset- ' + '{}'.format(dataset)) <--too much (now) irrelevant output 
         for img in os.listdir(img_list):
             img_path = os.path.join(img_list, img)
             input_img = cv2.imread(img_path, flags=0)
