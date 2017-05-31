@@ -64,9 +64,8 @@ def load_and_shuffle(data_path):
         j += 1
 
     img_data = np.array(img_data_list)
-    if not '_bin_' in data_path:
-        img_data = img_data.astype('float32')
-        img_data /= 255
+    img_data = img_data.astype('float32')
+    img_data /= 255
 
     # Add ONE channel
     if num_channel == 1:

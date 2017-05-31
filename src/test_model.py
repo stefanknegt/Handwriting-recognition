@@ -25,9 +25,8 @@ input_img=cv2.imread(abs_file_path, flags=0)
 input_img_resize=cv2.resize(input_img,(128,128))
 
 img_data = np.array(input_img_resize)
-if not '_bin_' in rel_path:
-    img_data = img_data.astype('float32')
-    img_data /= 255
+img_data = img_data.astype('float32')
+img_data /= 255
 if K.image_data_format() == 'channels_first':
     img_data = np.expand_dims(img_data, axis=0)
     img_data = np.expand_dims(img_data, axis=0)

@@ -2,9 +2,7 @@
 .idea/HWR.iml
 .idea/misc.xml
 lectures
-data/Train/annotated_crops/128_extended/*
-data/Train/annotated_crops/128_over_99
-data/Train/annotated_crops/128_over_9
+data/Train/annotated_crops/128_extended
 data/Train/annotated_crops/128_times_10
 data/Train/annotated_crops/128_bin
-data/Chinese*
+data/Train/annotated_crops/128_bin_times_10
