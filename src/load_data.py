@@ -8,7 +8,9 @@ else:
     K.set_image_data_format('channels_first')
 
 def load_data_internal(folder, verbose):
-    data_path = os.path.join('../data/Train/annotated_crops', folder)
+    script_dir = os.path.dirname(__file__)
+    test_path = os.path.join(script_dir,'../data/Train/annotated_crops')
+    data_path = os.path.join(test_path, folder)
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path, verbose)
     return num_classes, input_shape, X_train, y_train, X_test, y_test
 
@@ -16,14 +18,14 @@ def load_data(data_path, verbose):
     # Define data path
     num_classes = 0
     data_dir_list = os.listdir(data_path)
-    for i in range (0,len(data_dir_list)):
 
+    for i in range (0,len(data_dir_list)):
         if data_dir_list[i] == ".DS_Store":
             num_classes = len(data_dir_list)-1 #DS_Store screwes the count up so -1 for MAC only
             break
-
     if num_classes==0:
         num_classes = len(data_dir_list)
+
     num_channel=1
 
     # Load data from dir above
