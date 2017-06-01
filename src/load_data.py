@@ -7,12 +7,12 @@ if K.backend()=='tensorflow':
 else:
     K.set_image_data_format('channels_first')
 
-def load_data_internal(folder):
+def load_data_internal(folder, verbose):
     data_path = os.path.join('../data/Train/annotated_crops', folder)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path)
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path, verbose)
     return num_classes, input_shape, X_train, y_train, X_test, y_test
 
-def load_data(data_path):
+def load_data(data_path, verbose):
     # Define data path
     num_classes = 0
     data_dir_list = os.listdir(data_path)
@@ -33,7 +33,8 @@ def load_data(data_path):
         if dataset == ".DS_Store":
             continue
         img_list=os.path.join(data_path, dataset)
-        print ('Loaded the images of dataset- '+'{}'.format(dataset))
+        if verbose:
+            print ('Loaded the images of dataset- '+'{}'.format(dataset))
         for img in os.listdir(img_list):
             if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
                 continue
