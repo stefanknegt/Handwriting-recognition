@@ -66,19 +66,20 @@ def load_and_shuffle(data_path):
     img_data = np.array(img_data_list)
     img_data = img_data.astype('float32')
     img_data /= 255
+    print('Input dimensions of all data: ' + str(img_data.shape))
 
     # Add ONE channel
     if num_channel == 1:
         if K.image_data_format() == 'channels_first':
             img_data = np.expand_dims(img_data, axis=1)
-            #print (img_data.shape)
+            print('Input dimensions for model: ' + str(img_data.shape))
         else:
             img_data = np.expand_dims(img_data, axis=4)
-            #print (img_data.shape)
+            print('Input dimensions for model: ' + str(img_data.shape))
     else:
         if K.image_data_format() == 'channels_first':
             img_data = np.rollaxis(img_data, 3, 1)
-            #print (img_data.shape)
+            print('Input dimensions for model: ' + str(img_data.shape))
 
     # Label creation
     num_of_samples = img_data.shape[0]
