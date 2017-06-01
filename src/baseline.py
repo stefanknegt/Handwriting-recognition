@@ -4,6 +4,8 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential
 from load_data import load_data_internal, load_data_external
+from keras.models import load_model
+
 
 PLOT = True
 num_epoch = 20
@@ -19,7 +21,7 @@ def main():
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_bin_times_10')
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
     train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 # Define baseline CNN model
@@ -45,14 +47,18 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     model = baseline_model_CNN(num_classes, input_shape)
     model.summary()
     # Fit the model
-    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
+    script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+    rel_path = "../trained_models/baseline/baseline_128bin.h5"
+    abs_file_path = os.path.join(script_dir, rel_path)
+    model = load_model(abs_file_path)
+    #hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
 
     # Final evaluation of the model
     score = model.evaluate(X_test, y_test, batch_size=50, verbose=0)
     print('Test Loss:', score[0])
     print('Test accuracy:', score[1])
     print("Baseline Error: %.2f%%" % (100-score[1]*100))
-
+    """
     i = 0
     while os.path.exists('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5'):
         i+=1
@@ -88,7 +94,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         plt.legend(['train','val'],loc=4)
         plt.savefig('baseline' + str(X_train.shape[0]) + '_' + str(i) + 'accuracy.png')
         plt.close(f)
-        #print plt.style.available # use bmh, classic,ggplot for big pictures
+        #print plt.style.available # use bmh, classic,ggplot for big pictures"""
 
 if __name__ == '__main__':
     main()
