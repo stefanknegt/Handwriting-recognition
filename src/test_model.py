@@ -12,7 +12,7 @@ from keras.models import load_model
 
 # First, load model
 script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "baseline621.h5"
+rel_path = "../trained_models/baseline/baseline_128bin.h5"
 abs_file_path = os.path.join(script_dir, rel_path)
 model = load_model(abs_file_path)
 
@@ -42,3 +42,5 @@ print (test_image.shape)
 
 print(model.predict(test_image))
 print(model.predict_classes(test_image))
+
+print(np.amax(model.predict(test_image)))
