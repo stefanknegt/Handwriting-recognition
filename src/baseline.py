@@ -7,7 +7,7 @@ from load_data import load_data_internal
 from keras.callbacks import EarlyStopping
 
 
-PLOT = True
+PLOT = False
 num_epoch = 50
 
 
@@ -75,27 +75,24 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         val_acc=hist.history['val_acc']
         xc=range(num_epoch)
 
-        f = plt.figure(1,figsize=(7,5))
-        plt.subplot(21)
-        plt.plot(xc,train_loss)
-        plt.plot(xc,val_loss)
-        plt.xlabel('num of Epochs')
-        plt.ylabel('loss')
-        plt.title('train_loss vs val_loss ('+str(X_train.shape[0])+')')
-        plt.grid(True)
-        plt.legend(['train','val'])
+        f, (ax1, ax2) = plt.subplots(2, sharex=True, figsize=(7,5))
+        ax1.plot(xc,train_loss)
+        ax1.plot(xc,val_loss)
+        f.xlabel('num of Epochs')
+        ax1.ylabel('loss')
+        ax1.title('train_loss vs val_loss ('+str(X_train.shape[0])+')')
+        ax1.grid(True)
+        ax1.legend(['train','val'])
         #print plt.style.available # use bmh, classic,ggplot for big pictures
-        plt.style.use(['classic'])
+        ax1.style.use(['classic'])
 
-        plt.subplot(22)
-        plt.plot(xc,train_acc)
-        plt.plot(xc,val_acc)
-        plt.xlabel('num of Epochs')
-        plt.ylabel('accuracy')
-        plt.title('train_acc vs val_acc ('+str(X_train.shape[0])+')')
-        plt.grid(True)
-        plt.legend(['train','val'],loc=4)
-        plt.savefig('baseline' + str(X_train.shape[0]) + '_' + str(i) + 'accuracy.png')
+        ax2.plot(xc,train_acc)
+        ax2.plot(xc,val_acc)
+        ax2.ylabel('accuracy')
+        ax2.title('train_acc vs val_acc ('+str(X_train.shape[0])+')')
+        ax2.grid(True)
+        ax2.legend(['train','val'],loc=4)
+        f.savefig('baseline' + str(X_train.shape[0]) + '_' + str(i) + '_accuracy.png')
         plt.show()
         plt.close(f)
         #print plt.style.available # use bmh, classic,ggplot for big pictures
