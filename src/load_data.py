@@ -20,8 +20,16 @@ def load_data_external(folder):
 
 def load_data(data_path):
     # Define data path
+    num_classes = 0
     data_dir_list = os.listdir(data_path)
-    num_classes = len(data_dir_list)
+    for i in range (0,len(data_dir_list)):
+
+        if data_dir_list[i] == ".DS_Store":
+            num_classes = len(data_dir_list)-1 #DS_Store screwes the count up so -1 for MAC only
+            break
+
+    if num_classes==0:
+        num_classes = len(data_dir_list)
     num_channel=1
 
     # Load data from dir above
