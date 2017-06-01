@@ -4,14 +4,15 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential
 from keras.utils import np_utils
+from keras.callbacks import EarlyStopping
 from keras import backend as K
-from load_data import load_data_internal, load_data_external
+from load_data import load_data_internal
 if K.backend()=='tensorflow':
     K.set_image_data_format('channels_last')
 else:
     K.set_image_data_format('channels_first')
 PLOT = False
-num_epoch = 10
+num_epoch = 20
 
 def main(folder, fold):
     if fold is 0 or fold is 1:
@@ -143,7 +144,8 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
 
     print('Start training...')
     # Fit the model
-    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=4)
+    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2, callbacks=[early_stopping])
 
     # Final evaluation of the model
     score = model.evaluate(X_test, y_test, batch_size=50, verbose=0)

@@ -1,14 +1,13 @@
-import os, sys
-import matplotlib.pyplot as plt
+import os
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.models import Sequential
-from load_data import load_data_internal, load_data_external
-from keras.models import load_model
+from keras.models import Sequential, load_model
+from load_data import load_data_internal
+from keras.callbacks import EarlyStopping
 
 
 PLOT = True
-num_epoch = 20
+num_epoch = 50
 
 def main():
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_99')
@@ -19,10 +18,13 @@ def main():
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
-    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin')
+    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
     #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin_times_10')
     #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+
+    _, _, _, _, X_test, y_test = load_data_internal('128_bin')
+    evaluate_model(X_test, y_test, '128_bin')
 
 # Define baseline CNN model
 def baseline_model_CNN(num_classes, input_shape):
@@ -47,24 +49,22 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     model = baseline_model_CNN(num_classes, input_shape)
     model.summary()
     # Fit the model
-    script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-    rel_path = "../trained_models/baseline/baseline_128bin.h5"
-    abs_file_path = os.path.join(script_dir, rel_path)
-    model = load_model(abs_file_path)
-    #hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=4)
+    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2, callbacks=[early_stopping])
 
     # Final evaluation of the model
     score = model.evaluate(X_test, y_test, batch_size=50, verbose=0)
     print('Test Loss:', score[0])
     print('Test accuracy:', score[1])
     print("Baseline Error: %.2f%%" % (100-score[1]*100))
-    """
+
     i = 0
     while os.path.exists('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5'):
         i+=1
-    model.save('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5')
+    model.save('baseline_'+str(X_train.shape[0])+'_'+str(i)+'.h5')
 
     if PLOT:
+        import matplotlib.pyplot as plt
         # visualizing losses and accuracy
         train_loss=hist.history['loss']
         val_loss=hist.history['val_loss']
@@ -94,7 +94,19 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         plt.legend(['train','val'],loc=4)
         plt.savefig('baseline' + str(X_train.shape[0]) + '_' + str(i) + 'accuracy.png')
         plt.close(f)
-        #print plt.style.available # use bmh, classic,ggplot for big pictures"""
+        #print plt.style.available # use bmh, classic,ggplot for big pictures
+
+def evaluate_model(X_test, y_test, model_str):
+    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+    rel_path = "../trained_models/baseline/baseline_"+model_str+".h5"
+    abs_file_path = os.path.join(script_dir, rel_path)
+    model = load_model(abs_file_path)
+    model.summary()
+    score = model.evaluate(X_test, y_test, batch_size=50, verbose=0)
+    print('Test Loss:', score[0])
+    print('Test accuracy:', score[1])
+    print("Baseline Error: %.2f%%" % (100 - score[1] * 100))
+
 
 if __name__ == '__main__':
     main()

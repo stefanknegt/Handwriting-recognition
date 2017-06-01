@@ -1,7 +1,6 @@
-import os, cv2
+import os, cv2, numpy as np
 from keras.utils import np_utils
 from keras import backend as K
-import numpy as np
 
 if K.backend()=='tensorflow':
     K.set_image_data_format('channels_last')
@@ -10,11 +9,6 @@ else:
 
 def load_data_internal(folder):
     data_path = os.path.join('../data/Train/annotated_crops', folder)
-    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path)
-    return num_classes, input_shape, X_train, y_train, X_test, y_test
-
-def load_data_external(folder):
-    data_path = os.path.join('E:/Documenten/Studie/Master/HWR', folder)
     num_classes, input_shape, X_train, y_train, X_test, y_test = load_data(data_path)
     return num_classes, input_shape, X_train, y_train, X_test, y_test
 
