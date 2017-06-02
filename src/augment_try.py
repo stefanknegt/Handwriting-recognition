@@ -1,9 +1,9 @@
-from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 import os, cv2
 from preprocessing import binarize_otsu
 import matplotlib.pyplot as plt
 
 def augment():
+    from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
     datagen = ImageDataGenerator(
         rotation_range=10,
         #width_shift_range=0.10,
@@ -62,7 +62,7 @@ def extend_to_gray():
     for dataset in os.listdir(data_path):
         img_list = os.path.join(data_path, dataset)
         for img in os.listdir(img_list):
-            print('handling_extend_to_gray: '+str(img))
+            #print('handling_extend_to_gray: '+str(img))
             fullpath = os.path.join(img_list, img)
             input_img = cv2.imread(fullpath, flags=0)
             plt.imsave(fullpath, input_img)
@@ -72,7 +72,7 @@ def extend_to_bin():
     for dataset in os.listdir(data_path):
         img_list = os.path.join(data_path, dataset)
         for img in os.listdir(img_list):
-            print('handling_extend_to_bin: ' + str(img))
+            #print('handling_extend_to_bin: ' + str(img))
             fullpath = os.path.join(img_list, img)
             input_img = cv2.imread(fullpath, flags=0)
             otsu = binarize_otsu(input_img)
@@ -80,8 +80,8 @@ def extend_to_bin():
 
 
 if __name__ == '__main__':
-    print('Starting converting 128_times_10 to grayscale')
-    extend_to_gray()
+    print('Starting converting 128_extended_bin to binary')
+    extend_to_bin()
 
     #print('Done with converting to gray, starting conversion of 128_bin_times_10 to binary')
     #to_bin()
