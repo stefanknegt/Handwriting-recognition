@@ -45,6 +45,7 @@ def load_data(data_path, verbose):
             img_data_list.append(input_img)
 
     img_data = np.array(img_data_list)
+    del img_data_list
     img_data = img_data.astype('float32')
     img_data /= 255
     print('Input dimensions of all data: ' + str(img_data.shape))
@@ -65,22 +66,27 @@ def load_data(data_path, verbose):
 
     num_of_samples = img_data.shape[0]
     labels = np.ones((num_of_samples,), dtype='int64')
-    names = []
+    #names = []
 
     i = 0
     j = 0
 
     for dataset in data_dir_list:
-        names.append(dataset)
-        if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
-            continue
+        #names.append(dataset)
+        #if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
+            #continue
         img_list = os.listdir(data_path + '/' + dataset)
         for i in range(len(img_list)):
             labels[i] = j
         j += 1
 
+    del img_list
+    del i
+    del j
+
     # convert class labels to on-hot encoding
     Y = np_utils.to_categorical(labels, num_classes)
+    del labels
 
 
     #Shuffle the dataset -- DOESN'T WORK WITH VERY LARGE SETS MEMORY ERROR
@@ -91,6 +97,7 @@ def load_data(data_path, verbose):
     np.random.shuffle(img_data)
     np.random.set_state(rng_state)
     np.random.shuffle(Y)
+    del rng_state
 
     # Split the dataset -- DOESN't WORK WITH VERY LARGE SETS MEMORY ERROR
     #X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=2)
@@ -105,6 +112,8 @@ def load_data(data_path, verbose):
         Y_test = target[:ratio, :]
         return X_train, X_test, Y_train, Y_test
     X_train, X_test, y_train, y_test = split(img_data, Y, 5)
+    del img_data
+    del Y
 
     # Defining the model
     input_shape = X_train[0].shape
