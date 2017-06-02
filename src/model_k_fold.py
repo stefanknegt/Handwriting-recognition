@@ -108,7 +108,7 @@ def load_and_shuffle(data_path, verbose):
     return num_classes, input_shape, img_data, Y
 
 def k_fold(img_data, Y, fold, i):
-    print('fold '+str(i)+' of '+str(fold)+' folds, slitting data!')
+    print('fold '+str(i)+' of '+str(fold)+' folds, splitting data!')
     ratio = img_data.shape[0] / fold
     X_train = np.append(img_data[0:i*ratio,:],img_data[ratio+i*ratio:img_data.shape[0],:]).reshape(img_data.shape[0]-ratio, img_data.shape[1], img_data.shape[2], img_data.shape[3])
     y_train = np.append(Y[0:i*ratio,:],Y[ratio+i*ratio:Y.shape[0],:]).reshape(Y.shape[0]-ratio, Y.shape[1])
@@ -137,12 +137,12 @@ def baseline_model_CNN(num_classes, input_shape):
 
 def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, fold):
     model = baseline_model_CNN(num_classes, input_shape)
-    print('Model Summary: ')
-    model.summary()
+    #print('Model Summary: ')
+    #model.summary()
 
     print('Start training...')
     # Fit the model
-    early_stopping = EarlyStopping(monitor='val_loss', patience=4)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
     hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2, callbacks=[early_stopping])
 
     # Final evaluation of the model
