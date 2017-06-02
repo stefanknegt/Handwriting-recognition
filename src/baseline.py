@@ -1,4 +1,4 @@
-import os, numpy as np
+import os, sys, numpy as np
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential, load_model
@@ -6,28 +6,19 @@ from keras.utils import np_utils
 from load_data import load_data_internal
 from keras.callbacks import EarlyStopping
 
-
 PLOT = False
 num_epoch = 50
 
+def main(folder, eval):
+    if eval==1:
+        print('Evaluating baseline model')
+        num_classes, _, _, _, X_test, y_test = load_data_internal(folder, verbose=False)
+        evaluate_model(num_classes, X_test, y_test, folder)
+    else:
+        print('Training baseline model')
+        num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal(folder, verbose = False)
+        train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
-
-def main():
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_99', verbose = False)
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_over_9', verbose = False)
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128', verbose = False)
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_external('128_times_10', verbose = False)
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin', verbose = False)
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-    #num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal('128_bin_times_10', verbose = False)
-    #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
-
-    num_classes, _, _, _, X_test, y_test = load_data_internal('128_bin', verbose=False)
-    evaluate_model(num_classes, X_test, y_test, '128_bin')
 
 # Define baseline CNN model
 def baseline_model_CNN(num_classes, input_shape):
@@ -52,7 +43,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     model = baseline_model_CNN(num_classes, input_shape)
     model.summary()
     # Fit the model
-    early_stopping = EarlyStopping(monitor='val_loss', patience=4)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
     hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2, callbacks=[early_stopping])
 
     # Final evaluation of the model
@@ -112,4 +103,4 @@ def evaluate_model(num_classes, X_test, y_test, model_str):
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], int(sys.argv[2]))

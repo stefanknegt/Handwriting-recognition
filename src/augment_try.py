@@ -68,7 +68,7 @@ def extend_to_gray():
             plt.imsave(fullpath, input_img)
 
 def extend_to_bin():
-    data_path = '../data/Train/annotated_crops/128_extended'
+    data_path = '../data/Train/annotated_crops/128_extended_bin'
     for dataset in os.listdir(data_path):
         img_list = os.path.join(data_path, dataset)
         for img in os.listdir(img_list):
@@ -81,7 +81,8 @@ def extend_to_bin():
 
 if __name__ == '__main__':
     print('Starting converting 128_times_10 to grayscale')
-    to_gray()
-    print('Done with converting to gray, starting conversion of 128_bin_times_10 to binary')
-    to_bin()
+    extend_to_gray()
+
+    #print('Done with converting to gray, starting conversion of 128_bin_times_10 to binary')
+    #to_bin()
     print('Done, ready for new training')
