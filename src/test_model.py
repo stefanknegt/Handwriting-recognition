@@ -1,18 +1,17 @@
-import cv2
-import numpy as np
-import os
-
+import cv2, os, numpy as np
+from keras.models import load_model
 from keras import backend as K
+
 if K.backend()=='tensorflow':
     K.set_image_data_format('channels_last')
 else:
     K.set_image_data_format('channels_first')
 
-from keras.models import load_model
+
 
 # First, load model
 script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "baseline621.h5"
+rel_path = "../trained_models/baseline/baseline_128bin.h5"
 abs_file_path = os.path.join(script_dir, rel_path)
 model = load_model(abs_file_path)
 
@@ -30,15 +29,14 @@ img_data /= 255
 if K.image_data_format() == 'channels_first':
     img_data = np.expand_dims(img_data, axis=0)
     img_data = np.expand_dims(img_data, axis=0)
-    print (img_data.shape)
+    print('Input dimensions for model: ' + str(img_data.shape))
 else:
     img_data = np.expand_dims(img_data, axis=2)
     img_data = np.expand_dims(img_data, axis=2)
-    print (img_data.shape)
+    print('Input dimensions for model: ' + str(img_data.shape))
 test_image = img_data
-
-
-print (test_image.shape)
 
 print(model.predict(test_image))
 print(model.predict_classes(test_image))
+
+print(np.amax(model.predict(test_image)))

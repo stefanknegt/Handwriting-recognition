@@ -4,24 +4,25 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.models import Sequential
 from keras.utils import np_utils
+from keras.callbacks import EarlyStopping
 from keras import backend as K
-from load_data import load_data_internal, load_data_external
+from load_data import load_data_internal
 if K.backend()=='tensorflow':
     K.set_image_data_format('channels_last')
 else:
     K.set_image_data_format('channels_first')
 PLOT = False
-num_epoch = 10
+num_epoch = 50
 
 def main(folder, fold):
     if fold is 0 or fold is 1:
         print('No clear fold given, run once with 80% Train, 20% Test')
-        num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal(folder)
+        num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal(folder, verbose=False)
         acc = train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, 1)
     else:
         print('Training Baseline_model with '+str(fold)+' folds')
         accuracy = np.zeros(fold)
-        num_classes, input_shape, img_data, Y = load_and_shuffle_internal(folder)
+        num_classes, input_shape, img_data, Y = load_and_shuffle_internal(folder, verbose=False)
         for i in range(0, fold):
             X_train, y_train, X_test, y_test = k_fold(img_data, Y, fold, i)
             accuracy[i] = train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, fold)
@@ -31,17 +32,12 @@ def main(folder, fold):
         print('Mean accuracy: '+str(mean))
         print('Standard deviation: '+str(std))
 
-def load_and_shuffle_internal(folder):
+def load_and_shuffle_internal(folder, verbose):
     data_path = os.path.join('../data/Train/annotated_crops', folder)
-    num_classes, input_shape, img_data, Y = load_and_shuffle(data_path)
+    num_classes, input_shape, img_data, Y = load_and_shuffle(data_path, verbose)
     return num_classes, input_shape, img_data, Y
 
-def load_and_shuffle_external(folder):
-    data_path = os.path.join('E:/Documenten/Studie/Master/HWR', folder)
-    num_classes, input_shape, img_data, Y = load_and_shuffle(data_path)
-    return num_classes, input_shape, img_data, Y
-
-def load_and_shuffle(data_path):
+def load_and_shuffle(data_path, verbose):
     # Define data path
     data_dir_list = os.listdir(data_path)
     num_classes = len(data_dir_list)
@@ -53,7 +49,8 @@ def load_and_shuffle(data_path):
     j = 0
     for dataset in data_dir_list:
         img_list = os.path.join(data_path, dataset)
-        # print ('Loaded the images of dataset- ' + '{}'.format(dataset)) <--too much (now) irrelevant output 
+        if verbose:
+            print ('Loaded the images of dataset- ' + '{}'.format(dataset))
         for img in os.listdir(img_list):
             img_path = os.path.join(img_list, img)
             input_img = cv2.imread(img_path, flags=0)
@@ -66,19 +63,20 @@ def load_and_shuffle(data_path):
     img_data = np.array(img_data_list)
     img_data = img_data.astype('float32')
     img_data /= 255
+    print('Input dimensions of all data: ' + str(img_data.shape))
 
     # Add ONE channel
     if num_channel == 1:
         if K.image_data_format() == 'channels_first':
             img_data = np.expand_dims(img_data, axis=1)
-            #print (img_data.shape)
+            print('Input dimensions for model: ' + str(img_data.shape))
         else:
             img_data = np.expand_dims(img_data, axis=4)
-            #print (img_data.shape)
+            print('Input dimensions for model: ' + str(img_data.shape))
     else:
         if K.image_data_format() == 'channels_first':
             img_data = np.rollaxis(img_data, 3, 1)
-            #print (img_data.shape)
+            print('Input dimensions for model: ' + str(img_data.shape))
 
     # Label creation
     num_of_samples = img_data.shape[0]
@@ -98,6 +96,7 @@ def load_and_shuffle(data_path):
     # convert class labels to on-hot encoding
     Y = np_utils.to_categorical(labels, num_classes)
 
+    print('Randomly shuffling data')
     # Scary unison shuffle!
     rng_state = np.random.get_state()
     np.random.shuffle(img_data)
@@ -109,6 +108,7 @@ def load_and_shuffle(data_path):
     return num_classes, input_shape, img_data, Y
 
 def k_fold(img_data, Y, fold, i):
+    print('fold '+str(i)+' of '+str(fold)+' folds, splitting data!')
     ratio = img_data.shape[0] / fold
     X_train = np.append(img_data[0:i*ratio,:],img_data[ratio+i*ratio:img_data.shape[0],:]).reshape(img_data.shape[0]-ratio, img_data.shape[1], img_data.shape[2], img_data.shape[3])
     y_train = np.append(Y[0:i*ratio,:],Y[ratio+i*ratio:Y.shape[0],:]).reshape(Y.shape[0]-ratio, Y.shape[1])
@@ -137,12 +137,13 @@ def baseline_model_CNN(num_classes, input_shape):
 
 def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, fold):
     model = baseline_model_CNN(num_classes, input_shape)
-    print('Model Summary: ')
-    model.summary()
+    #print('Model Summary: ')
+    #model.summary()
 
     print('Start training...')
     # Fit the model
-    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
+    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=num_epoch, batch_size=100, verbose=2, callbacks=[early_stopping])
 
     # Final evaluation of the model
     score = model.evaluate(X_test, y_test, batch_size=50, verbose=0)
