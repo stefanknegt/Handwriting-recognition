@@ -1,0 +1,11 @@
+- 2 netwerken
+	- Eerste netwerk voor classes waar we meer dan 100 examples voor hebben
+	- Indien softmax activatie < threshold, tweede netwerk voor overige classes
+
+- Iets bedenken om tweede netwerk meer discriminative power te geven
+
+- Manier vinden om netwerken te trainen (pallas, peregrine o.i.d.) 
+
+- Draft report afmaken
+
+- RICA of Autoencoder mogelijkheid onderzoeken
