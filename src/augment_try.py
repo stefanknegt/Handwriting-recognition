@@ -85,22 +85,19 @@ def create_test_set(folder, NUM):
         os.makedirs(new)
     i = 0
     for dir in os.listdir(orig):
-        if i < NUM:
-            pat_or = os.path.join(orig, dir)
-            pat_new = os.path.join(new, dir)
-            if not os.path.exists(pat_new):
-                os.makedirs(pat_new)
-            once = True
-            for filename in os.listdir(pat_or):
-                if once:
-                    file_orig = os.path.join(pat_or, filename)
-                    file_new = os.path.join(pat_new, filename)
-                    input_img = cv2.imread(file_orig, flags=0)
-                    otsu = binarize_otsu(input_img)
-                    plt.imsave(file_new, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
-                    once=False
-        else:
-            break
+        pat_or = os.path.join(orig, dir)
+        pat_new = os.path.join(new, dir)
+        if not os.path.exists(pat_new):
+            os.makedirs(pat_new)
+        once = True
+        for filename in os.listdir(pat_or):
+            if once:
+                file_orig = os.path.join(pat_or, filename)
+                file_new = os.path.join(pat_new, filename)
+                input_img = cv2.imread(file_orig, flags=0)
+                otsu = binarize_otsu(input_img)
+                plt.imsave(file_new, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
+                once=False
 
 
 if __name__ == '__main__':
