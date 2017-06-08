@@ -5,4 +5,5 @@ lectures
 data/Train/annotated_crops/128_extended
 data/Train/annotated_crops/128_times_10
 data/Train/annotated_crops/128
+data/Train/annotated_crops/test_data
 trained_models
