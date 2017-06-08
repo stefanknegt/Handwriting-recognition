@@ -119,3 +119,50 @@ def load_data(data_path, verbose):
     input_shape = X_train[0].shape
 
     return num_classes, input_shape, X_train, y_train, X_test, y_test
+
+def load_test_data(folder, verbose):
+    script_dir = os.path.dirname(__file__)
+    test_path = os.path.join(script_dir, '../data/Train/annotated_crops/')
+    data_path = os.path.join(test_path, folder)
+
+    # Define data path
+    data_dir_list = os.listdir(data_path)
+
+    num_channel = 1
+
+    # Load data from dir above
+    img_data_list = []
+
+    for dataset in data_dir_list:
+        if dataset == ".DS_Store":
+            continue
+        img_list = os.path.join(data_path, dataset)
+        if verbose:
+            print ('Loaded the images of dataset- '+'{}'.format(dataset))
+        for img in os.listdir(img_list):
+            if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
+                continue
+            img_path = os.path.join(img_list, img)
+            input_img = cv2.imread(img_path, flags=0)
+            img_data_list.append(input_img)
+
+    img_data = np.array(img_data_list)
+    del img_data_list
+    img_data = img_data.astype('float32')
+    img_data /= 255
+    print('Input dimensions of all data: ' + str(img_data.shape))
+
+    # Add ONE channel
+    if num_channel == 1:
+        if K.image_data_format() == 'channels_first':
+            img_data = np.expand_dims(img_data, axis=1)
+            print('Input dimensions for model: ' + str(img_data.shape))
+        else:
+            img_data = np.expand_dims(img_data, axis=4)
+            print('Input dimensions for model: ' + str(img_data.shape))
+    else:
+        if K.image_data_format() == 'channels_first':
+            img_data = np.rollaxis(img_data, 3, 1)
+            print('Input dimensions for model: ' + str(img_data.shape))
+
+    return img_data
