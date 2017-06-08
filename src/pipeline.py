@@ -10,12 +10,13 @@ else:
     K.set_image_data_format('channels_first')
 
 script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "../trained_models/baseline/baseline_128.h5"
+rel_path = "../trained_models/baseline/baseline_original.h5"
 abs_file_path = os.path.join(script_dir, rel_path)
 model = load_model(abs_file_path)
 model.summary()
 
 num_classes, _, _, _, X_test, y_test = load_data_internal('128', verbose = False) #Hier komt een aparte functie voor alleen test data
+print(num_classes)
 print('Shape of testing data: '+ str(X_test.shape))
 print('Shape of testing labels: '+ str(y_test.shape))
 #train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
@@ -25,23 +26,22 @@ print('Shape of testing labels: '+ str(y_test.shape))
 #print('Test accuracy:', score[1])
 #print("Baseline Error: %.2f%%\n" % (100-score[1]*100))
 
-predictions = model.predict_classes(X_test, batch_size=50, verbose=0)
+predictions = model.predict(X_test, batch_size=50, verbose=0)
 pred = np_utils.to_categorical(predictions, num_classes)
 
-
 for i in range(0,len(predictions)):
-    predicted_class = predictions[i]
-    if(pred[i][predicted_class] < 1.0):
-        print("test")
+    predicted_class_model1 = np.argmax(predictions[i])
+    entropy_model1 = predictions[i][predicted_class_model1]
+    if(entropy_model1 < 0.99):
+        print(entropy_model1)
+        #Call hier tweede model
+        #if(entropy_model1 < entropy_model2): Dit is niet fair omdat tweede model meer classes heeft!
+            #predicted_class = predicted_class_model2
+        #else:
+                #predicted_class = predicted_class_model1
+    else:
+        predicted_class = predicted_class_model1
+        print("Predicted with certainty by model 1, class is %d with %.2f percent certainty" % (predicted_class, entropy_model1))
 
 accuracy = (np.count_nonzero(pred!=y_test)/(predictions.shape[0]*2))*100
 print("Model accuracy: "+ str(accuracy)+ '%')
-
-#for i in range(1,len(X_test)):
-    #print("Predicted class: "+str(model.predict_classes(X_test[0:i])[0]) + " with certainty: " + str(np.amax(model.predict(X_test[0:i]))))
-
-#if np.amax(model.predict(test_image)) < 0.99: ## ISN'T .99 ARBITRARY, WHY NOT TAKE 2.55*STDEV+MEAN? that's 99% certainty?
-    #save current predicted class and entropy
-    #run second model
-    #if second model softmax > previous then return label otherwise return old label
-    #maybe not fair since second model contains more classes?

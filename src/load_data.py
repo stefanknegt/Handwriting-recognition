@@ -73,8 +73,8 @@ def load_data(data_path, verbose):
 
     for dataset in data_dir_list:
         #names.append(dataset)
-        #if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
-            #continue
+        if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
+            continue
         img_list = os.listdir(data_path + '/' + dataset)
         for i in range(len(img_list)):
             labels[i] = j
