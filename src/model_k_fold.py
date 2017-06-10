@@ -26,6 +26,7 @@ def main(folder, fold):
         for i in range(0, fold):
             X_train, y_train, X_test, y_test = k_fold(img_data, Y, fold, i)
             accuracy[i] = train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test, fold)
+            del X_train, y_train, X_test, y_test
         mean = np.mean(accuracy)
         std = np.std(accuracy)
         print(accuracy)
