@@ -78,7 +78,7 @@ def extend_to_bin():
             otsu = binarize_otsu(input_img)
             plt.imsave(fullpath, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
 
-def create_test_set(folder, NUM):
+def create_test_set(folder):
     orig = '../data/Train/annotated_crops/'+folder
     new = '../data/Train/annotated_crops/test_set_'+folder
     if not os.path.exists(new):
@@ -99,8 +99,47 @@ def create_test_set(folder, NUM):
                 plt.imsave(file_new, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
                 once=False
 
+def split_dataset_simple(folder):
+    orig = '../data/Train/annotated_crops/'+folder
+    train = '../data/Train/annotated_crops/train_'+folder
+    test = '../data/Train/annotated_crops/test_'+folder
+    if not os.path.exists(train):
+        os.makedirs(train)
+    if not os.path.exists(test):
+        os.makedirs(test)
+    for dir in os.listdir(orig):
+        pat_or = os.path.join(orig, dir)
+        pat_tra = os.path.join(train, dir)
+        pat_tes = os.path.join(test, dir)
+        if not os.path.exists(pat_tra):
+            os.makedirs(pat_tra)
+        if not os.path.exists(pat_tes):
+            os.makedirs(pat_tes)
+        if len(os.listdir(pat_or))==1:
+            for filename in os.listdir(pat_or):
+                file_or = os.path.join(pat_or, filename)
+                file_tr = os.path.join(pat_tra, filename)
+                file_te = os.path.join(pat_tes, filename)
+                img = cv2.imread(file_or, flags=0)
+                otsu = binarize_otsu(img)
+                plt.imsave(file_tr, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
+                plt.imsave(file_te, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
+        else:
+            first = True
+            for filename in os.listdir(pat_or):
+                file_or = os.path.join(pat_or, filename)
+                img = cv2.imread(file_or, flags=0)
+                otsu = binarize_otsu(img)
+                if first:
+                    file_te = os.path.join(pat_tes, filename)
+                    plt.imsave(file_te, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
+                    first = False
+                else:
+                    file_tr = os.path.join(pat_tra, filename)
+                    plt.imsave(file_tr, otsu, cmap=plt.cm.gray, vmin=0, vmax=1)
+
+
 
 if __name__ == '__main__':
-    print('creating test sets')
-    create_test_set('128_bin', 1000)
-    create_test_set('128_extended_bin', 1000)
+    print('creating new train and test sets')
+    split_dataset_simple('128_extended_bin')

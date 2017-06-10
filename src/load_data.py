@@ -154,7 +154,7 @@ def load_test_data(folder, verbose):
 
     # Add ONE channel
     if num_channel == 1:
-        if K.image_data_format() == 'channels_first':
+        if K.image_data_format() == 'channels_last':
             img_data = np.expand_dims(img_data, axis=1)
             print('Input dimensions for model: ' + str(img_data.shape))
         else:

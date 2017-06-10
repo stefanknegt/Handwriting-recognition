@@ -1,36 +1,12 @@
 import os
-import re
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import misc
-from scipy.optimize import curve_fit
 from PIL import Image
 
 DEBUG_3 = False
 
 '''THIS FILE IS DEPRECATED USED FOR MOVING FILES AND RESIZING, CODE STILL USEFULL FOR COPYING'''
-
-def read_pgm(filename, byteorder='>'):
-    """Return image data from a raw PGM file as numpy array.
-
-    Format specification: http://netpbm.sourceforge.net/doc/pgm.html
-
-    """
-    with open(filename, 'rb') as f:
-        buffer = f.read()
-    try:
-        header, width, height, maxval = re.search(
-            b"(^P5\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n]\s)*)", buffer).groups()
-    except AttributeError:
-        raise ValueError("Not a raw PGM file: '%s'" % filename)
-    return np.frombuffer(buffer,
-                            dtype='u1' if int(maxval) < 256 else byteorder+'u2',
-                            count=int(width)*int(height),
-                            offset=len(header)
-                            ).reshape((int(height), int(width)))
 
 def main():
     for filename in os.listdir('data'):
@@ -52,6 +28,7 @@ def count():
         txt = txt+dir
         count = 0
         pa = os.path.join('annotated_crops/128_extended', dir)
+        print(len(os.listdir(pa)))
         for filename in os.listdir(pa):
             pat = os.path.join(pa, filename)
             if os.path.isfile(pat):
@@ -60,9 +37,19 @@ def count():
         txt = txt + ', ' + str(count) + '\n'
         
     print(total)
-    text_file = open("Occurences_extended.txt", "w")
+    text_file = open("Occurences_extended_once.txt", "w")
     text_file.write(txt)
     text_file.close()
+
+def count_ones():
+    count_one = 0
+    count_total = 0
+    for dir in os.listdir('../../data/Train/annotated_crops/128_extended_bin'):
+        pa = os.path.join('../../data/Train/annotated_crops/128_extended_bin', dir)
+        count_total += 1
+        if len(os.listdir(pa))==1:
+            count_one +=1
+    print(count_total, count_one, count_one/count_total*100)
 
 def sizes():
     orig = 'annotated_crops/original'
@@ -154,5 +141,5 @@ def sizes():
     print('done')
 
 if __name__ == '__main__':
-    count()
+    count_ones()
 
