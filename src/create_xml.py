@@ -2,6 +2,7 @@ from scipy import misc
 import os
 
 from preprocessing import *
+#from preprocessing import update_top_bottom
 
 # To do: we willen waarschijnlijk de bounding boxes nog verbeteren met de code die Rogier geschreven heeft
 # voor het verwijderen van whitespace, maar daar moeten we (Tim en Rogier) samen even voor zitten
@@ -9,6 +10,8 @@ from preprocessing import *
 def update_xml_boxes(im_path, im_file):
     '''function which finds bounding boxes for a line, using split by density and connected components methods
     from preprocessing.py'''
+    print(im_path)
+    print(im_file)
     img = misc.imread(os.path.join(im_path, im_file))
     img = preprocess_img(img)
 
@@ -18,11 +21,15 @@ def update_xml_boxes(im_path, im_file):
     lines_list, top_bottom, white_space = split_by_density(img, 0)
 
     for i in range(len(lines_list)):
+        #print("i is : " + str(i))
         # horizontal boundaries are stored in x_coords
         im_list, x_coords = split_with_con_comp(lines_list[i])
-        for left_right in x_coords:
+        for j in range(len(im_list)):
+            #print("j is : " + str(j))
+            im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
+            left_right = x_coords[j]
             # add a 'box' with left top corner coordinate and width and height
-            boxes.append((left_right[0], top_bottom[i][0], left_right[1] - left_right[0], top_bottom[i][1] - top_bottom[i][0]))
+            boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
 
     xml = im_file.replace(".pgm", "_updated.xml")
 
@@ -45,7 +52,7 @@ def main():
         path = os.path.join(os.getcwd(), rel_path)
         files = os.listdir(path)
         print(path)
-        for file in [files]: # 'for file in files' gets all files
+        for file in files: # 'for file in files' gets all files
             if '.xml' in file:
                 continue
             else:
