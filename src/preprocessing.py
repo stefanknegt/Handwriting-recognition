@@ -203,6 +203,30 @@ def remove_whitespace_top_bottom(img):
     ud_img = np.delete(ud_img, np.arange(i), 0)
     img = np.flipud(ud_img)
     return img
+    
+    
+def update_top_bottom(img, top_bottom):
+    '''This removes the whitespace from top and bottom of an img (np-array) and returns the updated top and bottom as a tuple'''
+    for i in range(0,img.shape[0]):
+        for j in range(0, img.shape[1]):
+            if img[i][j]!=1:
+                break
+        if img[i][j] !=1:
+            break
+    img = np.delete(img,np.arange(i),0)
+    top_offset = i
+    ud_img = np.flipud(img)
+    for i in range(0,ud_img.shape[0]):
+        for j in range(0, ud_img.shape[1]):
+            if ud_img[i][j]!=1:
+                break
+        if ud_img[i][j] !=1:
+            break
+    ud_img = np.delete(ud_img, np.arange(i), 0)
+    bot_offset = i
+    img = np.flipud(ud_img)
+    top_bottom = (top_bottom[0] + top_offset, top_bottom[1] + bot_offset) # add offsets to top and bottom ycoords
+    return img, top_bottom 
 
 
 def calculate_sizes(char_list):
