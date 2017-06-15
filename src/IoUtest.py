@@ -1,17 +1,23 @@
-# SI= Max(0, Min(XA2, XB2) - Max(XA1, XB1)) * Max(0, Min(YA2, YB2) - Max(YA1, YB1))
-# then the union will be S=SA+SB-SI
-# And finally, the ratio will be SI / S.
 
 # NOT FINISHED YET
+import os
 
-for i in range(1, 13):  # 'for i range(1,13)' gets all folders
+# this list will contain IoU for all bounding boxes in the lines of the original xml files and our corresponding
+# updated xml file. The format is [XA1, XA2, YA1, YA2, UTFA, FILENAME, XB1, XB2, YB1, YB2, UTFB, IoU] where XA1 is
+# the left x coordinate of the original bounding box and XB1 the left x coordinate of our updated bounding box
+with open('intersections.csv', 'a') as csv_file:
+    csv_file.write("XA1, XA2, YA1, YA2, UTFA, FILENAME, XB1, XB2, YB1, YB2, UTFB, IoU, \n")
+
+
+for i in range(1, 3):  # 'for i range(1,13)' gets all folders
     rel_path = os.path.relpath('../data/Train/lines+xml/' + str(i) + '/')
     path = os.path.join(os.getcwd(), rel_path)
     files = os.listdir(path)
     print(path)
-    for j in range(len(files)):  # 'for file in files' gets all files
-        if '.pgm' in files(j):
-            continue
+    j=0
+    while j < len(files):  # 'for file in files' gets all files
+        if '.pgm' in files[j]:
+            j+=1
         else:
             lines = [line.rstrip('\n') for line in open(path)]
             x = '-x='
@@ -20,30 +26,50 @@ for i in range(1, 13):  # 'for i range(1,13)' gets all folders
             h = '-h='
             utf = '<utf> '
             for line in lines:
-                # Find coordinates of boundary box in original xml file
+                # Find coordinates of boundary box in original xml file and save to originalxml list
                 xlo = line.find(x) + len(x)
                 ylo = line.find(y) + len(y)
                 hlo = line.find(h) + len(h)
                 wlo = line.find(w) + len(w)
+                utflo = line.find(utf) + len(utf)
                 X = int(line[xlo:xlo + 4])
                 Y = int(line[ylo:ylo + 4])
                 W = int(line[wlo:wlo + 4])
                 H = int(line[hlo:hlo + 4])
-                XA1 = X
-                XA2 = X+W
-                YA1 = Y
-                YA2 = Y+H
-                # Find coordinates of boundary box in updated xml file
-                xlo = line.find(x) + len(x)
-                ylo = line.find(y) + len(y)
-                hlo = line.find(h) + len(h)
-                wlo = line.find(w) + len(w)
-                X = int(line[xlo:xlo + 4])
-                Y = int(line[ylo:ylo + 4])
-                W = int(line[wlo:wlo + 4])
-                H = int(line[hlo:hlo + 4])
-                XA1 = X
-                XA2 = X+W
-                YA1 = Y
-                YA2 = Y+H
+                UTF = line[utflo:utflo + 4]
+
+                # Lines in the next xml file which is our updated xml corresponding to the original xml
+                linesupdated = [lineupdated.rstrip('\n') for lineupdated in open(files(j+1))]
+                iou = 0
+                for lineupdated in linesupdated:
+                # Find x coordinates of boundary boxes in updated xml file
+                    x2lo = lineupdated.find(x) + len(x)
+                    w2lo = lineupdated.find(w) + len(w)
+                    y2lo = lineupdated.find(y) + len(y)
+                    h2lo = lineupdated.find(h) + len(h)
+                    utf2lo = lineupdated.find(utf) + len(utf)
+                    X2 = int(lineupdated[xlo:xlo + 4])
+                    W2 = int(lineupdated[wlo:wlo + 4])
+                    Y2 = int(lineupdated[ylo:ylo + 4])
+                    H2 = int(lineupdated[hlo:hlo + 4])
+                    UTF2 = lineupdated[utflo:utflo + 4]
+                    # If there is overlap between the two bounding boxes in the x direction
+                    if ((X2+W2) >= X) and ((X+W) >= X2):
+                        # Save the IoU
+                        overlap = max(0, min(X+W, X2+W2) - max(X, X2)) * max(0, min(Y+H, Y2+H2) - max(Y, Y2))
+                        union = (W*H)+(W2*H2)-overlap
+                        ioutemp = overlap/union
+                        if ioutemp > iou:
+                            iou = ioutemp
+                            XB1 = X2
+                            XB2 = X2+W2
+                            YB1 = Y2
+                            YB2 = Y2+H2
+                with open('intersections.csv', 'a') as csv_file:
+                    csv_file.write(str(X)+", "+str(X+W)+", "+str(Y)+", "+str(Y+H)+", "+UTF+", "+files(j)+", "+ \
+                        str(XB1)+", "+str(XB2)+", "+str(YB1)+", "+str(YB2)+", "+UTF2+", "+str(iou)+"\n")
+            j+=2
+
+
+
 
