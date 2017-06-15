@@ -104,7 +104,7 @@ def split_by_density(img, axis):
             #track nr of whitespaces previous to image segment
             white_space.append(w)
             w = 0
-        elif image_flag and hist[i] <= SPLIT_TH:
+        elif image_flag and (hist[i] <= SPLIT_TH or i + 1 == len(hist)):
             im_stop = i
             image_flag = False
             if axis == 1:
@@ -321,7 +321,7 @@ def main():
     #     '../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm') # character touches table line
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18796_0001-line-008-y1=1083-y2=1252.pgm') # character touches table line
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
@@ -369,8 +369,8 @@ def main():
     if True:
         char_list = []
         for lin in lines_list:
-            #plt.imshow(lin, cmap=plt.cm.gray)
-            #plt.show()
+            plt.imshow(lin, cmap=plt.cm.gray)
+            plt.show()
             im_list, lines = split_with_con_comp(lin)
             char_list.extend(im_list)
 
