@@ -196,18 +196,6 @@ def update_top_bottom(img, top_bottom):
     top_bottom = (top_bottom[0] + top_offset, top_bottom[1] - bot_offset) # add offsets to top and bottom ycoords
     return img, top_bottom 
 
-def calculate_sizes(char_list):
-    sizes = np.zeros((len(char_list),2), dtype=np.int)
-    i=0
-    for image in char_list:
-        sizes[i] = [image.shape[0], image.shape[1]]
-        i +=1
-    mean = np.mean(sizes, axis = 0)
-    std = np.std(sizes, axis=0)
-
-    print(mean.tolist(), std.tolist())
-    print(np.max(sizes, axis=0).tolist())
-
 def sizes(image, rotate, output):
     if rotate:
         image = np.rot90(image, 3)
@@ -217,11 +205,6 @@ def sizes(image, rotate, output):
             max_size = image.shape[0]
         else:
             max_size = image.shape[1]
-
-        if DEBUG:
-            fig = plt.figure()
-            fig.add_subplot(3, 1, 1)
-            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
 
         diff0 = (max_size - image.shape[0])
         if diff0 <= 0:
@@ -250,11 +233,7 @@ def sizes(image, rotate, output):
             a = np.ones((image.shape[0], diff1), dtype=np.int)
             image = np.concatenate((image, a), axis=1)
 
-        if DEBUG:
-            fig.add_subplot(3,1,2)
-            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
-
-    ''' ERROR!! '''
+    ## This is the final resizing and padding
     new_image = misc.imresize(image, (output-int(2*edge), output-int(2*edge)), interp='nearest')
     a = np.ones((edge, new_image.shape[0]), dtype=np.int)
     new_image = np.insert(new_image, 0, a, 1)
@@ -264,32 +243,51 @@ def sizes(image, rotate, output):
     new_image = np.insert(new_image, 0, a, 0)
     new_image = np.concatenate((new_image, a), axis=0)
 
-    if DEBUG:
-        fig.add_subplot(3,1,3)
-        plt.imshow(new_image, cmap=plt.cm.gray, vmin=0, vmax=1)
-        plt.show()
 
     return new_image
 
-def preprocess_img(img):
-    img = binarize_otsu(img)
-    img = remove_table_lines(img, 1, MIN_TABLE_SIZE_H)
-    img = remove_table_lines(img, MIN_TABLE_SIZE_V, 1)
-    img = remove_noise(img, NOISE_SIZE_TH)
-    return img
-
-def main():
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
-
-    otsu = binarize_otsu(line)
-    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)  # removes horizontal table lines
-    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)  # removes vertical table lines
+def boxes_img(img):
+    otsu = binarize_otsu(img)
+    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
+    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
     test = remove_noise(test, NOISE_SIZE_TH)
 
     if DEBUG:
         fig = plt.figure()
         a = fig.add_subplot(3, 1, 1)
-        plt.imshow(line, cmap=plt.cm.gray)
+        plt.imshow(img, cmap=plt.cm.gray)
+        a = fig.add_subplot(3, 1, 2)
+        plt.imshow(otsu, cmap=plt.cm.gray)
+        a = fig.add_subplot(3, 1, 3)
+        plt.imshow(test, cmap=plt.cm.gray)
+        plt.show()
+
+    boxes = []
+    lines_list, top_bottom, white_space = split_by_density(test, 0)
+
+    for i in range(len(lines_list)):
+        #print("i is : " + str(i))
+        # horizontal boundaries are stored in x_coords
+        im_list, x_coords = split_with_con_comp(lines_list[i])
+        for j in range(len(im_list)):
+            #print("j is : " + str(j))
+            im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
+            left_right = x_coords[j]
+            # add a 'box' with left top corner coordinate and width and height
+            boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
+
+    return boxes
+
+def process_for_classification(img):
+    otsu = binarize_otsu(img)
+    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
+    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
+    test = remove_noise(test, NOISE_SIZE_TH)
+
+    if DEBUG:
+        fig = plt.figure()
+        a = fig.add_subplot(3, 1, 1)
+        plt.imshow(img, cmap=plt.cm.gray)
         a = fig.add_subplot(3, 1, 2)
         plt.imshow(otsu, cmap=plt.cm.gray)
         a = fig.add_subplot(3, 1, 3)
@@ -297,31 +295,41 @@ def main():
         plt.show()
 
     lines_list, lines, white_space = split_by_density(test, 0)
-
     char_list = []
     for lin in lines_list:
         im_list, lines = split_with_con_comp(lin)
         char_list.extend(im_list)
 
+    final_images = []
     for image in char_list:
         new_img = remove_whitespace_top_bottom(image)
-        # new_list.insert(0,new_img)
-        # print(new_list)
         final_img = sizes(new_img, True, 128)
+        final_images.append(final_img)
 
-        if True:
+        if DEBUG:
             fig = plt.figure()
-            fig.add_subplot(2, 1, 1)
-            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
-            h_hist = density_plot(image, 0)
 
-            x = np.arange(len(h_hist))
-            plt.plot(h_hist, x)
-            fig.add_subplot(2, 1, 2)
+            fig.add_subplot(3, 1, 1)
+            plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
+            #h_hist = density_plot(image, 0)
+            #x = np.arange(len(h_hist))
+            #plt.plot(h_hist, x)
+
+            fig.add_subplot(3,1,2)
+            plt.imshow(new_img, cmap=plt.cm.gray, vmin=0, vmax=1)
+
+            fig.add_subplot(3, 1, 3)
             plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
 
-    # calculate_sizes(new_list)
+    return final_images
+
+def main():
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
+
+    process_for_classification(line)
+
 
 if __name__ == '__main__':
     main()

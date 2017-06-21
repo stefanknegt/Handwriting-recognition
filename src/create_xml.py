@@ -1,7 +1,7 @@
 from scipy import misc
 import os
 
-from preprocessing import *
+from preprocessing import boxes_img, process_for_classification
 #from preprocessing import update_top_bottom
 
 # To do: we willen waarschijnlijk de bounding boxes nog verbeteren met de code die Rogier geschreven heeft
@@ -13,28 +13,21 @@ def update_xml_boxes(im_path, im_file):
     print(im_path)
     print(im_file)
     img = misc.imread(os.path.join(im_path, im_file))
-    img = preprocess_img(img)
-
-    boxes = []
-
-    # vertical boundaries are stored in top_bottom
-    lines_list, top_bottom, white_space = split_by_density(img, 0)
-
-    for i in range(len(lines_list)):
-        #print("i is : " + str(i))
-        # horizontal boundaries are stored in x_coords
-        im_list, x_coords = split_with_con_comp(lines_list[i])
-        for j in range(len(im_list)):
-            #print("j is : " + str(j))
-            im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
-            left_right = x_coords[j]
-            # add a 'box' with left top corner coordinate and width and height
-            boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
+    boxes = boxes_img(img)
+    images = process_for_classification(img)
+    i = 0
 
     xml = im_file.replace(".pgm", "_updated.xml")
 
     with open(os.path.join(im_path, xml), 'w') as f:
         for box in boxes:
+            '''
+            character = images[i]
+            
+            
+            
+            i += 1
+            '''
             # pad each value with zeros to length of four
             box = ['0' * (4 - len(str(i))) + str(i) for i in box]
 
