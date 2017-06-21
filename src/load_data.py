@@ -76,8 +76,9 @@ def load_data(data_path, verbose):
         if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
             continue
         img_list = os.listdir(data_path + '/' + dataset)
-        for i in range(len(img_list)):
+        for k in range(len(img_list)):
             labels[i] = j
+            i += 1
         j += 1
 
     del img_list
@@ -184,8 +185,9 @@ def load_test_data(folder, verbose):
         if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
             continue
         img_list = os.listdir(data_path + '/' + dataset)
-        for i in range(len(img_list)):
+        for k in range(len(img_list)):
             labels[i] = j
+            i += 1
         j += 1
 
     del img_list

@@ -91,8 +91,9 @@ def load_and_shuffle(data_path, verbose):
     for dataset in data_dir_list:
         #names.append(dataset)
         img_list = os.listdir(data_path + '/' + dataset)
-        for i in range(len(img_list) - invalid_ims[j]):
+        for k in range(len(img_list) - invalid_ims[j]):
             labels[i] = j
+            i += 1
         j += 1
         
     del data_dir_list, i, j
