@@ -1,4 +1,7 @@
-from scipy import misc
+from scipy import misc, ndimage
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import os
 
 from preprocessing import *
@@ -24,12 +27,24 @@ def update_xml_boxes(im_path, im_file):
         #print("i is : " + str(i))
         # horizontal boundaries are stored in x_coords
         im_list, x_coords = split_with_con_comp(lines_list[i])
+        print(x_coords)
         for j in range(len(im_list)):
             #print("j is : " + str(j))
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
             left_right = x_coords[j]
             # add a 'box' with left top corner coordinate and width and height
+            
             boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
+            if True:
+                fig,ax = plt.subplots(1)
+
+                # Display the image
+                ax.imshow(img, cmap=plt.cm.gray)
+                rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
+                ax.add_patch(rect)
+                plt.show()
+                plt.imshow(im_list[j], cmap=plt.cm.gray)
+                plt.show()
 
     xml = im_file.replace(".pgm", "_updated.xml")
 
@@ -47,7 +62,7 @@ def update_xml_boxes(im_path, im_file):
 
 def main():
     # loop over all files in all lines+xml folders
-    for i in range(1, 12): # 'for i range(1,13)' gets all folders
+    for i in range(1, 2): # 'for i range(1,13)' gets all folders
         rel_path = os.path.relpath('../data/Train/lines+xml/' + str(i) + '/')
         path = os.path.join(os.getcwd(), rel_path)
         files = os.listdir(path)
@@ -57,6 +72,7 @@ def main():
                 continue
             else:
                 update_xml_boxes(rel_path, file)
+                break
 
 if __name__ == '__main__':
     main()
