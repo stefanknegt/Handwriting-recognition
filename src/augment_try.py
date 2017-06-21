@@ -13,8 +13,8 @@ def augment():
         fill_mode='nearest')
 
     TIMES = 10
-    orig = '../data/Train/annotated_crops/128_bin'
-    new = 'E:/Documenten/Studie/Master/HWR/128_bin_times_'+str(TIMES)
+    orig = '../data/Train/annotated_crops/128_extended_bin'
+    new = 'E:/Documenten/Studie/Master/HWR/128_extended_bin_times_'+str(TIMES)
     if not os.path.exists(new):
         os.makedirs(new)
     for dir in os.listdir(orig):
@@ -35,9 +35,11 @@ def augment():
                 if i>=TIMES:
                     break
     print("Done, you've got some new files!")
+    to_bin
+
 
 def to_gray():
-    data_path = 'E:/Documenten/Studie/Master/HWR/128_times_10'
+    data_path = 'E:/Documenten/Studie/Master/HWR/128_extended_bin_times_10'
     for dataset in os.listdir(data_path):
         img_list = os.path.join(data_path, dataset)
         for img in os.listdir(img_list):
@@ -47,7 +49,7 @@ def to_gray():
             plt.imsave(fullpath, input_img)
 
 def to_bin():
-    data_path = 'E:/Documenten/Studie/Master/HWR/128_bin_times_10'
+    data_path = 'E:/Documenten/Studie/Master/HWR/128_extended_bin_times_10'
     for dataset in os.listdir(data_path):
         img_list = os.path.join(data_path, dataset)
         for img in os.listdir(img_list):
@@ -141,5 +143,4 @@ def split_dataset_simple(folder):
 
 
 if __name__ == '__main__':
-    print('creating new train and test sets')
-    split_dataset_simple('128_extended_bin')
+    augment()
