@@ -128,6 +128,13 @@ def load_test_data(folder, verbose):
     # Define data path
     data_dir_list = os.listdir(data_path)
 
+    for i in range (0,len(data_dir_list)):
+        if data_dir_list[i] == ".DS_Store":
+            num_classes = len(data_dir_list)-1 #DS_Store screwes the count up so -1 for MAC only
+            break
+    if num_classes==0:
+        num_classes = len(data_dir_list)
+
     num_channel = 1
 
     # Load data from dir above
@@ -165,4 +172,28 @@ def load_test_data(folder, verbose):
             img_data = np.rollaxis(img_data, 3, 1)
             print('Input dimensions for model: ' + str(img_data.shape))
 
-    return img_data
+    num_of_samples = img_data.shape[0]
+    labels = np.ones((num_of_samples,), dtype='int64')
+    # names = []
+
+    i = 0
+    j = 0
+
+    for dataset in data_dir_list:
+        # names.append(dataset)
+        if dataset == ".DS_Store" or img == ".DS_Store" or img_list == ".DS_Store":
+            continue
+        img_list = os.listdir(data_path + '/' + dataset)
+        for i in range(len(img_list)):
+            labels[i] = j
+        j += 1
+
+    del img_list
+    del i
+    del j
+
+    # convert class labels to on-hot encoding
+    Y = np_utils.to_categorical(labels, num_classes)
+    del labels
+
+    return img_data, Y

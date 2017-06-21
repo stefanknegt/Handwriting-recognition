@@ -9,15 +9,10 @@ from keras.callbacks import EarlyStopping
 PLOT = False
 num_epoch = 50
 
-def main(folder, eval):
-    if eval==1:
-        print('Evaluating baseline model')
-        num_classes, _, _, _, X_test, y_test = load_data_internal(folder, verbose=False)
-        evaluate_model(num_classes, X_test, y_test, folder)
-    else:
-        print('Training baseline model')
-        num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal(folder, verbose = False)
-        train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
+def main(folder):
+    print('Training baseline model')
+    num_classes, input_shape, X_train, y_train, X_test, y_test = load_data_internal(folder, verbose = False)
+    train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test)
 
 
 # Define baseline CNN model
@@ -85,7 +80,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
         ax2.legend(['train','val'],loc=4)
         f.savefig('baseline' + str(X_train.shape[0]) + '_' + str(i) + '_accuracy.png')
         plt.show()
-        plt.close(f)
+        plt.close()
         #print plt.style.available # use bmh, classic,ggplot for big pictures
 
 def evaluate_model(num_classes, X_test, y_test, model_str):
@@ -103,4 +98,4 @@ def evaluate_model(num_classes, X_test, y_test, model_str):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], int(sys.argv[2]))
+    main(sys.argv[1])
