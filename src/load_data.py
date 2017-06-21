@@ -127,7 +127,7 @@ def load_test_data(folder, verbose):
 
     # Define data path
     data_dir_list = os.listdir(data_path)
-
+    num_classes = 0
     for i in range (0,len(data_dir_list)):
         if data_dir_list[i] == ".DS_Store":
             num_classes = len(data_dir_list)-1 #DS_Store screwes the count up so -1 for MAC only
