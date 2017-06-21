@@ -34,6 +34,99 @@ def baseline_model_CNN(num_classes, input_shape):
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
+# CNN1
+def CNN1(num_classes, input_shape):
+    # create model
+    model = Sequential()
+
+    model.add(Conv2D(128, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(256, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(512, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
+    # Compile model
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    return model
+
+#CNN2
+def CNN2(num_classes, input_shape):
+    # create model
+    model = Sequential()
+
+    model.add(Conv2D(64, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(128, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(256, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Conv2D(512, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    model.add(Dropout(0.5))
+
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
+    # Compile model
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    return model
+
+#CNN3
+def CNN2_no_dropout(num_classes, input_shape):
+    # create model
+    model = Sequential()
+
+    model.add(Conv2D(64, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(128, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(256, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(512, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
+    #model.add(Dropout(0.5))
+
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    #model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='relu'))
+    #model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
+    # Compile model
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    return model
+
+
 def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_test):
     model = baseline_model_CNN(num_classes, input_shape)
     model.summary()
