@@ -15,7 +15,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
-DEBUG = False
+DEBUG = True
 
 def binarize(img):
     '''turns gray scale image into binary based on threshold'''
@@ -225,7 +225,7 @@ def update_top_bottom(img, top_bottom):
     ud_img = np.delete(ud_img, np.arange(i), 0)
     bot_offset = i
     img = np.flipud(ud_img)
-    top_bottom = (top_bottom[0] + top_offset, top_bottom[1] + bot_offset) # add offsets to top and bottom ycoords
+    top_bottom = (top_bottom[0] + top_offset, top_bottom[1] - bot_offset) # add offsets to top and bottom ycoords
     return img, top_bottom 
 
 
@@ -321,7 +321,7 @@ def main():
     #     '../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-005-y1=701-y2=852.pgm')  # character touches table line
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18796_0001-line-008-y1=1083-y2=1252.pgm') # character touches table line
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-007-y1=984-y2=1129.pgm')
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-008-y1=1120-y2=1268.pgm')
     # line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-009-y1=1259-y2=1499.pgm')
