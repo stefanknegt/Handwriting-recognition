@@ -391,7 +391,7 @@ def main():
         # print(new_list)
         final_img = sizes(new_img, True, 128)
 
-        if DEBUG:
+        if True:
             fig = plt.figure()
             fig.add_subplot(2, 1, 1)
             plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
