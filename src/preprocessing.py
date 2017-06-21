@@ -1,7 +1,7 @@
 from scipy import misc, ndimage
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+import matplotlib.patches as patches
 
 try:
     from skimage import filters
@@ -248,11 +248,15 @@ def sizes(image, rotate, output):
 
     return new_image
 
-def boxes_img(img):
+def process_for_classification(img):
     otsu = binarize_otsu(img)
     test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
     test = remove_noise(test, NOISE_SIZE_TH)
+
+    lines_list, top_bottom, white_space = split_by_density(test, 0)
+    char_list = []
+    boxes = []
 
     if DEBUG:
         fig = plt.figure()
@@ -264,13 +268,14 @@ def boxes_img(img):
         plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
 
-    boxes = []
-    lines_list, top_bottom, white_space = split_by_density(test, 0)
+    if DEBUG:
+        fig, ax = plt.subplots(1)
+        ax.imshow(test, cmap=plt.cm.gray)
 
     for i in range(len(lines_list)):
-        #print("i is : " + str(i))
-        # horizontal boundaries are stored in x_coords
         im_list, x_coords = split_with_con_comp(lines_list[i])
+        char_list.extend(im_list)
+
         for j in range(len(im_list)):
             #print("j is : " + str(j))
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
@@ -278,29 +283,12 @@ def boxes_img(img):
             # add a 'box' with left top corner coordinate and width and height
             boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
 
-    return boxes
-
-def process_for_classification(img):
-    otsu = binarize_otsu(img)
-    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
-    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
-    test = remove_noise(test, NOISE_SIZE_TH)
+            if DEBUG:
+                rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
+                ax.add_patch(rect)
 
     if DEBUG:
-        fig = plt.figure()
-        a = fig.add_subplot(3, 1, 1)
-        plt.imshow(img, cmap=plt.cm.gray)
-        a = fig.add_subplot(3, 1, 2)
-        plt.imshow(otsu, cmap=plt.cm.gray)
-        a = fig.add_subplot(3, 1, 3)
-        plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
-
-    lines_list, lines, white_space = split_by_density(test, 0)
-    char_list = []
-    for lin in lines_list:
-        im_list, lines = split_with_con_comp(lin)
-        char_list.extend(im_list)
 
     final_images = []
     for image in char_list:
@@ -324,7 +312,7 @@ def process_for_classification(img):
             plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
 
-    return final_images
+    return boxes, final_images
 
 def main():
     line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
