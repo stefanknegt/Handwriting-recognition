@@ -1,4 +1,7 @@
-from scipy import misc
+from scipy import misc, ndimage
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import os
 
 from preprocessing import boxes_img, process_for_classification
@@ -13,21 +16,40 @@ def update_xml_boxes(im_path, im_file):
     print(im_path)
     print(im_file)
     img = misc.imread(os.path.join(im_path, im_file))
-    boxes = boxes_img(img)
-    images = process_for_classification(img)
-    i = 0
+    img = preprocess_img(img)
+
+    boxes = []
+
+    # vertical boundaries are stored in top_bottom
+    lines_list, top_bottom, white_space = split_by_density(img, 0)
+
+    for i in range(len(lines_list)):
+        #print("i is : " + str(i))
+        # horizontal boundaries are stored in x_coords
+        im_list, x_coords = split_with_con_comp(lines_list[i])
+        print(x_coords)
+        for j in range(len(im_list)):
+            #print("j is : " + str(j))
+            im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
+            left_right = x_coords[j]
+            # add a 'box' with left top corner coordinate and width and height
+
+            boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
+            if True:
+                fig,ax = plt.subplots(1)
+
+                # Display the image
+                ax.imshow(img, cmap=plt.cm.gray)
+                rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
+                ax.add_patch(rect)
+                plt.show()
+                plt.imshow(im_list[j], cmap=plt.cm.gray)
+                plt.show()
 
     xml = im_file.replace(".pgm", "_updated.xml")
 
     with open(os.path.join(im_path, xml), 'w') as f:
         for box in boxes:
-            '''
-            character = images[i]
-            
-            
-            
-            i += 1
-            '''
             # pad each value with zeros to length of four
             box = ['0' * (4 - len(str(i))) + str(i) for i in box]
 

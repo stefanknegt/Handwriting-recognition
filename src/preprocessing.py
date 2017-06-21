@@ -96,12 +96,14 @@ def split_with_con_comp(img):
     # hist = density_plot(img, 1)
     img_lst, lines, wh_sp = split_by_density(img, 1)
     img_lst_new = []
+    lines_lst_new = []
     line_count = 0
     for i in range(0, len(img_lst)):
         image = img_lst[i]
         line_count += wh_sp[i]
         if image.shape[1] < image.shape[0]:
             img_lst_new.append(image)
+            lines_lst_new.append(lines[i])
         else:
             # print('trying to split wide image')
 
@@ -145,13 +147,13 @@ def split_with_con_comp(img):
                     min_max[comp.label - 1] = list([min_max[comp.label - 1][0], comp.stop])
 
             for slic in min_max:
-                lines.append((line_count + slic[0], line_count + slic[1]))
+                lines_lst_new.append((line_count + slic[0], line_count + slic[1]))
                 # lines.append()
                 new_im = image[:, slic[0]:slic[1]]
                 img_lst_new.append(new_im)
 
         line_count += image.shape[1]
-    return img_lst_new, lines
+    return img_lst_new, lines_lst_new
 
 def remove_whitespace_top_bottom(img):
     ''' This removes the whitespace from top and bottom of an img (np-array)'''
