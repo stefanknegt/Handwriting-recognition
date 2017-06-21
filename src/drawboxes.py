@@ -10,8 +10,10 @@ w = '-w='
 h = '-h='
 utf = '<utf> '
 
+imagetry = '../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289'
+
 line = misc.imread(
-    '../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm')  # Contains 3 bad IoU's
+    imagetry + '.pgm')  # Contains 3 bad IoU's
 
 # Create figure and axes
 fig,ax = plt.subplots(1)
@@ -23,7 +25,7 @@ ax.imshow(line, cmap=plt.cm.gray)
 # fig1 = plt.figure()
 # plt.imshow(line, cmap=plt.cm.gray)
 
-with open('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.xml', 'r') as original:
+with open(imagetry + '.xml', 'r') as original:
     lines = [line.rstrip('\n') for line in original]
     for line in lines:
         # Find coordinates of boundary box in original xml file and save to originalxml list
@@ -44,7 +46,7 @@ with open('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-
         # Add the patch to the Axes
         ax.add_patch(rect)
 
-with open('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571_updated.xml', 'r') as updated:
+with open(imagetry + '_updated.xml', 'r') as updated:
     linesupdated = [lineupdated.rstrip('\n') for lineupdated in updated]
 
     for lineupdated in linesupdated:

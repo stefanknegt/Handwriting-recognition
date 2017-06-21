@@ -9,7 +9,7 @@ with open('intersections.csv', 'w') as csv_file:
     csv_file.write("XA1, XA2, YA1, YA2, UTFA, FILENAME, XB1, XB2, YB1, YB2, IoU, \n")
 
 
-for i in range(1, 3):  # 'for i range(1,13)' gets all folders
+for i in range(1, 12):  # 'for i range(1,13)' gets all folders
     rel_path = os.path.relpath('../data/Train/lines+xml/' + str(i) + '/')
     path = os.path.join(os.getcwd(), rel_path)
     files = os.listdir(path)
