@@ -141,7 +141,7 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     print("Baseline Error: %.2f%%" % (100-score[1]*100))
 
     i = 0
-    while os.path.exists('baseline'+str(X_train.shape[0])+'_'+str(i)+'.h5'):
+    while os.path.exists('baseline_'+str(X_train.shape[0])+'_'+str(i)+'.h5'):
         i+=1
     model.save('baseline_'+str(X_train.shape[0])+'_'+str(i)+'.h5')
 

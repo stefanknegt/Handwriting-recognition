@@ -15,7 +15,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
-DEBUG = True
+DEBUG = False
 
 def binarize_otsu(img):
     "Turns greyscale image into binary using Otsu's method"
@@ -311,6 +311,8 @@ def process_for_classification(img):
             fig.add_subplot(3, 1, 3)
             plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
+
+    final_images = np.array(final_images)
 
     return boxes, final_images
 

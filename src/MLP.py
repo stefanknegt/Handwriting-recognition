@@ -129,6 +129,12 @@ def train_test_evaluate(num_classes, input_shape, X_train, y_train, X_test, y_te
     print('Test Loss:', score[0])
     print('Test accuracy:', score[1])
     print("Baseline Error: %.2f%%" % (100-score[1]*100))
+
+    i = 0
+    while os.path.exists('MLP_' + str(X_train.shape[0]) + '_' + str(i) + '.h5'):
+        i += 1
+    model.save('MLP_' + str(X_train.shape[0]) + '_' + str(i) + '.h5')
+
     return score[1]
 
 if __name__ == '__main__':
