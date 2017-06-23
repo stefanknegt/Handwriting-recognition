@@ -1,5 +1,5 @@
 from scipy import misc
-import os, pickle
+import os
 from preprocessing import process_for_classification
 
 def update_xml_boxes(im_path, im_file):
@@ -10,9 +10,6 @@ def update_xml_boxes(im_path, im_file):
     img = misc.imread(os.path.join(im_path, im_file))
     boxes, characters = process_for_classification(img)
     i = 0
-
-    with open('names.txt', 'rb') as fp:
-        label_names = pickle.load(fp)
 
     xml = im_file.replace(".pgm", "_updated.xml")
 

@@ -4,4 +4,13 @@
 lectures
 data/Train/annotated_crops/128_extended
 data/Train/annotated_crops/128_times_10
-data/Train/lines+xml/*
+data/Train/lines+xml/3
+data/Train/lines+xml/4
+data/Train/lines+xml/5
+data/Train/lines+xml/6
+data/Train/lines+xml/7
+data/Train/lines+xml/8
+data/Train/lines+xml/9
+data/Train/lines+xml/10
+data/Train/lines+xml/11
+data/Train/lines+xml/12
