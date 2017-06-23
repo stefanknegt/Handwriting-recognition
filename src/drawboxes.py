@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import matplotlib.patches as patches
+from preprocessing import *
 
 x = '-x='
 y = '-y='
@@ -10,17 +11,23 @@ w = '-w='
 h = '-h='
 utf = '<utf> '
 
-imagetry = '../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289'
+imagetry = '../data/Train/lines+xml/1/navis-Ming-Qing_18641_0028-line-005-y1=574-y2=716'
 
 line = misc.imread(
     imagetry + '.pgm')  # Contains 3 bad IoU's
 
+otsu = binarize_otsu(line)
+test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
+test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
+test = remove_noise(test, NOISE_SIZE_TH)
+
 # Create figure and axes
-fig,ax = plt.subplots(1)
+f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
 
 # Display the image
-ax.imshow(line, cmap=plt.cm.gray)
-
+ax1.imshow(line, cmap=plt.cm.gray)
+ax2.imshow(otsu, cmap=plt.cm.gray)
+ax3.imshow(test, cmap=plt.cm.gray)
 
 # fig1 = plt.figure()
 # plt.imshow(line, cmap=plt.cm.gray)
@@ -44,7 +51,8 @@ with open(imagetry + '.xml', 'r') as original:
         rect = patches.Rectangle((X, Y), W, H, linewidth=1, edgecolor='r', facecolor='none')
 
         # Add the patch to the Axes
-        ax.add_patch(rect)
+        ax3.add_patch(rect)
+
 
 with open(imagetry + '_updated.xml', 'r') as updated:
     linesupdated = [lineupdated.rstrip('\n') for lineupdated in updated]
@@ -67,7 +75,7 @@ with open(imagetry + '_updated.xml', 'r') as updated:
         rect = patches.Rectangle((X2, Y2), W2, H2, linewidth=1, edgecolor='g', facecolor='none')
 
         # Add the patch to the Axes
-        ax.add_patch(rect)
+        ax3.add_patch(rect)
 
 plt.show()
 
