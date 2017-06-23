@@ -1,23 +1,16 @@
-import os, cv2, numpy as np
+import os, numpy as np
 from keras.models import load_model
 from load_data import load_test_data, load_data_internal
-from keras.utils import np_utils
 from matplotlib import pyplot
 
-from keras import backend as K
-if K.backend()=='tensorflow':
-    K.set_image_data_format('channels_last')
-else:
-    K.set_image_data_format('channels_first')
-
 script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "../trained_models/10_fold_extended_0.h5"
+rel_path = "baseline_21584_0.h5"
 abs_file_path = os.path.join(script_dir, rel_path)
 model = load_model(abs_file_path)
 model.summary()
 
-#num_classes, _, _, _, X_test, y_test = load_data_internal('128_extended_bin', verbose = False) #Hier komt een aparte functie voor alleen test data
-X_test, y_test = load_test_data('test_128_extended_bin', verbose = False)
+_, _, _, _, X_test, y_test = load_data_internal('128_bin', verbose = False) #Hier komt een aparte functie voor alleen test data
+#X_test, y_test = load_test_data('test_128_extended_bin', verbose = False)
 #print(num_classes)
 print('Shape of testing data: '+ str(X_test.shape))
 print('Shape of testing labels: '+ str(y_test.shape))
@@ -47,12 +40,20 @@ for i in range(0,len(predictions)):
                 #predicted_class = predicted_class_model1
     else:
         predicted_class = predicted_class_model1
-        print("Predicted with certainty by model 1, class is %d with %.2f percent certainty" % (predicted_class, entropy_model1))
+        #print("Predicted with certainty by model 1, class is %d with %.2f percent certainty" % (predicted_class, entropy_model1))
 
 #accuracy = (np.count_nonzero(pred!=y_test)/(predictions.shape[0]*2))*100
 #print("Model accuracy: "+ str(accuracy)+ '%')
-print(np.average(entropies))
-print(np.mean(entropies))
+print('Mean entropy: ' + str(np.mean(entropies)))
+print('std entropy: ' + str(np.std(entropies)))
 pyplot.hist(entropies)
 pyplot.axvline(np.mean(entropies), color='b', linestyle='dashed', linewidth=2)
 pyplot.show()
+
+def calc(mat1, mat2):
+    acc = np.zeros(mat1.shape[0])
+    for i in range(mat1.shape[0]):
+        acc[i] = 1-(np.count_nonzero(mat1[i]!=mat2[i])/mat1.shape[1])
+    return acc
+total_accuracy = np.mean(calc(predictions, y_test))
+print('Total accuracy is: '+ str(total_accuracy))
