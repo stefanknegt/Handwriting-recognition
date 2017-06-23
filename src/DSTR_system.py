@@ -10,7 +10,7 @@ else:
     K.set_image_data_format('channels_first')
 
 script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
-rel_path = "baseline_21584_0.h5"
+rel_path = "../trained_models/extended/baseline_extended.h5"
 abs_file_path = os.path.join(script_dir, rel_path)
 model = load_model(abs_file_path)
 model.summary()
@@ -20,13 +20,12 @@ with open('names.txt', 'rb') as fp:
 
 DEBUG = True
 
-def main(folder='../data/Train/lines+xml/5'):
+def main(folder='../data/Train/lines+xml/4'):
     # Reading in line-to-classify
     #rel_path = os.path.relpath('PATH_TO_TEST_LINES_FOLDER')
     top_path = os.path.relpath(folder)
     path = os.path.join(os.getcwd(), top_path)
     files = os.listdir(path)
-    total = 0
     for file in files:  # 'for file in files' gets all files
         if '.xml' in file:
             continue
