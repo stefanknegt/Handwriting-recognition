@@ -27,7 +27,11 @@ def remove_table_lines(img, x, y):
     '''Removes horizontal or vertical table lines'''
     img_inv = np.logical_not(img)
     str_e = np.ones((x, y))
-    str_d = np.ones((x+5, y+5)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
+    # parameters voor het str_d element waarmee otsu net zo goed werkt voor het removen van de tablelines als global threshold van 254:
+    if x > y:
+        str_d = np.ones((x*10, y+7)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
+    else:
+        str_d = np.ones((x+7, y*10))
     eroded = ndimage.binary_erosion(img_inv, structure=str_e).astype(img_inv.dtype)
     # recon_image = ndimage.binary_propagation(eroded, mask=img_inv)
     recon_image = ndimage.binary_dilation(eroded, structure=str_d).astype(eroded.dtype)
@@ -271,12 +275,12 @@ def sizes(image, rotate, output):
 
 def process_for_classification(img):
     otsu = binarize_otsu(img)
-    #testz = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
-    #test = remove_table_lines(testz, MIN_TABLE_SIZE_V, 1)
-    #test = remove_noise(test, NOISE_SIZE_TH)
-    test = remove_table_lines2(otsu, img, 1, MIN_TABLE_SIZE_H)
-    test = remove_table_lines2(test, img, MIN_TABLE_SIZE_V, 1)
+    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
+    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
     test = remove_noise(test, NOISE_SIZE_TH)
+    #test = remove_table_lines2(otsu, img, 1, MIN_TABLE_SIZE_H)
+    #test = remove_table_lines2(test, img, MIN_TABLE_SIZE_V, 1)
+    #test = remove_noise(test, NOISE_SIZE_TH)
 
     lines_list, top_bottom, white_space = split_by_density(test, 0)
     char_list = []
