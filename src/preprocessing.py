@@ -15,7 +15,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
-DEBUG = False
+DEBUG = True
 
 def binarize_otsu(img):
     "Turns greyscale image into binary using Otsu's method"
@@ -27,13 +27,27 @@ def remove_table_lines(img, x, y):
     '''Removes horizontal or vertical table lines'''
     img_inv = np.logical_not(img)
     str_e = np.ones((x, y))
-    str_d = np.ones((x+2, y+2)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
+    str_d = np.ones((x+5, y+5)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
     eroded = ndimage.binary_erosion(img_inv, structure=str_e).astype(img_inv.dtype)
     # recon_image = ndimage.binary_propagation(eroded, mask=img_inv)
     recon_image = ndimage.binary_dilation(eroded, structure=str_d).astype(eroded.dtype)
-    recon_image = np.logical_not(recon_image)
-    res = np.logical_not(img - recon_image)
+    #recon_image = np.logical_not(recon_image)
+    #res = np.logical_not(img - recon_image)
+    res = np.logical_or(img, recon_image)
     return res
+    
+def remove_table_lines2(img, ref_img, x, y):
+    '''Removes horizontal or vertical table lines'''
+    bin_img = ref_img > 254
+    img_inv = np.logical_not(bin_img)
+    str_e = np.ones((x, y))
+    str_d = np.ones((x+5, y+5)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
+    eroded = ndimage.binary_erosion(img_inv, structure=str_e).astype(img_inv.dtype)
+    # recon_image = ndimage.binary_propagation(eroded, mask=img_inv)
+    recon_image = ndimage.binary_dilation(eroded, structure=str_d).astype(eroded.dtype)
+    #recon_image = np.logical_not(recon_image)
+    res = np.logical_or(img, recon_image)
+    return res    
 
 def remove_noise(img, threshold, inv=True):
     '''closing/opening by reconstruction'''
@@ -72,7 +86,7 @@ def split_by_density(img, axis):
             #lines.append(i)
             #track nr of whitespaces previous to image segment
             white_space.append(w)
-            w = 0
+            w = 1
         elif image_flag and (hist[i] <= SPLIT_TH or i + 1 == len(hist)):
             im_stop = i
             image_flag = False
@@ -105,7 +119,7 @@ def split_with_con_comp(img):
             img_lst_new.append(image)
             lines_lst_new.append(lines[i])
         else:
-            # print('trying to split wide image')
+            print('trying to split wide image')
 
             img_inv = np.logical_not(image)
             labels, n_labels = ndimage.label(img_inv)
@@ -115,25 +129,32 @@ def split_with_con_comp(img):
             sz = [int(x) for x in sizes.tolist()[1:]]
             # print(sz)
             ordered_labels = [i[0] for i in sorted(enumerate(sz), key=lambda x:x[1], reverse=True)]
-            # sprint(ordered_labels)
+            print(ordered_labels)
             label_i = 1
             components = []
             for i in range(1, n_labels + 1):
                 slice_x, slice_y = ndimage.find_objects(labels == ordered_labels[i - 1] + 1)[0]
                 new_comp = Component(slice_y.start, slice_y.stop)
+                print('new comp : ' + str(new_comp.__dict__))
                 if not components:
                     new_comp.label = label_i
 
                 for comp in components:
+                    print('compare with comp : ' + str(comp.__dict__))
                     if new_comp.start < comp.start:
-                        if new_comp.stop > comp.start and (new_comp.stop - comp.start) / min(new_comp.size, comp.size) > OVERLAP_TH:
-                            new_comp.label = comp.label
-                            break
+                        if new_comp.stop > comp.start:
+                            print((new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)))
+                            if (new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)) > OVERLAP_TH:
+                                new_comp.label = comp.label
+                                break
                     else:
-                        if comp.stop > new_comp.start and (comp.stop - new_comp.start) / min(new_comp.size, comp.size) > OVERLAP_TH:
-                            new_comp.label = comp.label
-                            break
+                        if comp.stop > new_comp.start:
+                            print((comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)))
+                            if (comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)) > OVERLAP_TH:
+                                new_comp.label = comp.label
+                                break
                 if not new_comp.label:
+                    print('fits with none, new label')
                     label_i += 1
                     new_comp.label = label_i
                 components.append(new_comp)
@@ -250,8 +271,11 @@ def sizes(image, rotate, output):
 
 def process_for_classification(img):
     otsu = binarize_otsu(img)
-    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
-    test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
+    #testz = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
+    #test = remove_table_lines(testz, MIN_TABLE_SIZE_V, 1)
+    #test = remove_noise(test, NOISE_SIZE_TH)
+    test = remove_table_lines2(otsu, img, 1, MIN_TABLE_SIZE_H)
+    test = remove_table_lines2(test, img, MIN_TABLE_SIZE_V, 1)
     test = remove_noise(test, NOISE_SIZE_TH)
 
     lines_list, top_bottom, white_space = split_by_density(test, 0)
@@ -261,7 +285,7 @@ def process_for_classification(img):
     if DEBUG:
         fig = plt.figure()
         a = fig.add_subplot(3, 1, 1)
-        plt.imshow(img, cmap=plt.cm.gray)
+        plt.imshow(img > 254, cmap=plt.cm.gray)
         a = fig.add_subplot(3, 1, 2)
         plt.imshow(otsu, cmap=plt.cm.gray)
         a = fig.add_subplot(3, 1, 3)
@@ -319,6 +343,7 @@ def process_for_classification(img):
 def main():
     line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
     line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
 
     process_for_classification(line)
 
