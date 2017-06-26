@@ -4,7 +4,7 @@ from keras.models import load_model
 from preprocessing import process_for_classification
 
 from keras import backend as K
-if K.backend() == 'tensorflow':
+if K.backend() == 'theano':
     K.set_image_data_format('channels_last')
 else:
     K.set_image_data_format('channels_first')
@@ -56,7 +56,7 @@ def process_line(path, im_file):
     predicted_class_model = np.argmax(predictions, axis=1)
 
     if DEBUG:
-        characters = np.squeeze(characters, axis=1)
+        characters = np.squeeze(characters, axis=3)
         entropies = []
         for i in range(0, len(predictions)):
             predicted_class_model1 = np.argmax(predictions[i])

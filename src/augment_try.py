@@ -18,7 +18,7 @@ def augment():
     if not os.path.exists(new):
         os.makedirs(new)
     for dir in os.listdir(orig):
-        #print('Processing dir: '+ str(dir))
+        print('Augmenting dir: '+ str(dir))
         path_orig = os.path.join(orig, dir)
         path_new = os.path.join(new, dir)
         if not os.path.exists(path_new):
@@ -35,7 +35,6 @@ def augment():
                 if i>=TIMES:
                     break
     print("Done, you've got some new files!")
-    to_bin
 
 
 def to_gray():
@@ -51,9 +50,9 @@ def to_gray():
 def to_bin():
     data_path = 'E:/Documenten/Studie/Master/HWR/128_extended_bin_times_10'
     for dataset in os.listdir(data_path):
+        print('handling_dataset_to_bin: ' + str(dataset))
         img_list = os.path.join(data_path, dataset)
         for img in os.listdir(img_list):
-            print('handling_to_bin: ' + str(img))
             fullpath = os.path.join(img_list, img)
             input_img = cv2.imread(fullpath, flags=0)
             otsu = binarize_otsu(input_img)
@@ -144,3 +143,4 @@ def split_dataset_simple(folder):
 
 if __name__ == '__main__':
     augment()
+    to_bin()

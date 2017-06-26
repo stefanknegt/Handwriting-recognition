@@ -123,7 +123,7 @@ def split_with_con_comp(img):
             img_lst_new.append(image)
             lines_lst_new.append(lines[i])
         else:
-            print('trying to split wide image')
+            #print('trying to split wide image')
 
             img_inv = np.logical_not(image)
             labels, n_labels = ndimage.label(img_inv)
@@ -133,32 +133,32 @@ def split_with_con_comp(img):
             sz = [int(x) for x in sizes.tolist()[1:]]
             # print(sz)
             ordered_labels = [i[0] for i in sorted(enumerate(sz), key=lambda x:x[1], reverse=True)]
-            print(ordered_labels)
+            #print(ordered_labels)
             label_i = 1
             components = []
             for i in range(1, n_labels + 1):
                 slice_x, slice_y = ndimage.find_objects(labels == ordered_labels[i - 1] + 1)[0]
                 new_comp = Component(slice_y.start, slice_y.stop)
-                print('new comp : ' + str(new_comp.__dict__))
+                #print('new comp : ' + str(new_comp.__dict__))
                 if not components:
                     new_comp.label = label_i
 
                 for comp in components:
-                    print('compare with comp : ' + str(comp.__dict__))
+                    #print('compare with comp : ' + str(comp.__dict__))
                     if new_comp.start < comp.start:
                         if new_comp.stop > comp.start:
-                            print((new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)))
+                            #print((new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)))
                             if (new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)) > OVERLAP_TH:
                                 new_comp.label = comp.label
                                 break
                     else:
                         if comp.stop > new_comp.start:
-                            print((comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)))
+                            #print((comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)))
                             if (comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)) > OVERLAP_TH:
                                 new_comp.label = comp.label
                                 break
                 if not new_comp.label:
-                    print('fits with none, new label')
+                    #print('fits with none, new label')
                     label_i += 1
                     new_comp.label = label_i
                 components.append(new_comp)
@@ -226,7 +226,7 @@ def update_top_bottom(img, top_bottom):
 def sizes(image, rotate, output):
     if rotate:
         image = np.rot90(image, 3)
-    edge = int((output/16.0)/2.0)
+    edge = int((output/32.0)/2.0)
     if image.shape[0]!=image.shape[1]:
         if image.shape[0] >= image.shape[1]:
             max_size = image.shape[0]
@@ -273,18 +273,78 @@ def sizes(image, rotate, output):
 
     return new_image
 
+def combine_small(boxes, small_w = 35):
+    def getKey(item):
+        return item[0]
+    boxes = sorted(boxes, key = getKey)
+    boxes2 = []
+    skip = False
+    for i in range(len(boxes)):
+        if skip:
+            skip = False
+            continue
+        if boxes[i][2] <= small_w: # Width of a box is below 30
+            if i == 0: # First char, check only with second char
+                x2 = boxes[i][0] + boxes[i][2]
+                x3 = boxes[i + 1][0]
+                gap = x3 - x2
+                dir = 'right'
+                #print('first char is small')
+            elif i >= len(boxes)-1: # Last char, check only with previous char
+                x0 = boxes2[ - 1][0] + boxes2[ - 1][2]
+                x1 = boxes[i][0]
+                gap = x1 - x0
+                dir = 'left'
+                #print('last char is small')
+            else: # Middle chars, check with previous and next char
+                #print('small box found')
+                x0 = boxes2[-1][0]+boxes2[-1][2]
+                x1 = boxes[i][0]
+                x2 = boxes[i][0]+boxes[i][2]
+                x3 = boxes[i+1][0]
+                gap1 = x1 - x0
+                gap2 = x3 - x2
+                if gap1 < gap2:
+                    gap = gap1
+                    dir = 'left'
+                else:
+                    gap = gap2
+                    dir = 'right'
+
+            if gap > boxes[i][2]: # gap is groter dan breedte character, staat op zichzelf
+                boxes2.append(boxes[i])
+                #print('small box is independent')
+            else:
+                if dir == 'left':
+                     # remove latest entry to boxes2
+                    x = boxes2[-1][0]
+                    y = min(boxes2[-1][1], boxes[i][1])
+                    w = boxes[i][0]+boxes[i][2]-boxes2[-1][0]
+                    h = max(boxes[i][1]+boxes[i][3], boxes2[-1][1]+boxes2[-1][3]) - y
+                    del boxes2[-1]
+                    boxes2.append((x ,y ,w ,h ))
+                    #print('previous box deleted, small box added to previous box')
+                else:
+                    x = boxes[i][0]
+                    y = min(boxes[i][1], boxes[i+1][1])
+                    w = boxes[i+1][0]+boxes[i+1][2]-boxes[i][0]
+                    h = max(boxes[i+1][1]+boxes[i+1][3], boxes[i][1]+boxes[i][3]) - y
+                    boxes2.append((x, y, w, h))
+                    skip = True
+                    #print('small box added to right box, next one skipped')
+        else:
+            boxes2.append(boxes[i])
+    return boxes2
+
 def process_for_classification(img):
     otsu = binarize_otsu(img)
     test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
-    test = remove_noise(test, NOISE_SIZE_TH)
+
     #test = remove_table_lines2(otsu, img, 1, MIN_TABLE_SIZE_H)
     #test = remove_table_lines2(test, img, MIN_TABLE_SIZE_V, 1)
-    #test = remove_noise(test, NOISE_SIZE_TH)
 
-    lines_list, top_bottom, white_space = split_by_density(test, 0)
-    char_list = []
-    boxes = []
+    test = remove_noise(test, NOISE_SIZE_TH)
 
     if DEBUG:
         fig = plt.figure()
@@ -296,14 +356,15 @@ def process_for_classification(img):
         plt.imshow(test, cmap=plt.cm.gray)
         plt.show()
 
+    lines_list, top_bottom, white_space = split_by_density(test, 0)
+    boxes = []
+
     if DEBUG:
-        fig, ax = plt.subplots(1)
-        ax.imshow(test, cmap=plt.cm.gray)
+        fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+        ax1.imshow(test, cmap=plt.cm.gray)
 
     for i in range(len(lines_list)):
         im_list, x_coords = split_with_con_comp(lines_list[i])
-        char_list.extend(im_list)
-
         for j in range(len(im_list)):
             #print("j is : " + str(j))
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
@@ -313,40 +374,54 @@ def process_for_classification(img):
 
             if DEBUG:
                 rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
-                ax.add_patch(rect)
+                ax1.add_patch(rect)
+
+    boxes = combine_small(boxes)
 
     if DEBUG:
+        ax2.imshow(test, cmap=plt.cm.gray)
+        for box in boxes:
+            rect = patches.Rectangle((box[0],box[1]), box[2], box[3], linewidth=1, edgecolor='g', facecolor='none')
+            ax2.add_patch(rect)
         plt.show()
 
-    final_images = []
-    for image in char_list:
-        new_img = remove_whitespace_top_bottom(image)
-        final_img = sizes(new_img, True, 128)
-        final_images.append(final_img)
+    '''
+    Extract images from boxes
+    '''
+    final_images = np.zeros((len(boxes), 128, 128))
+    i = 0
+    ymax = test.shape[0]
+    print(test.shape)
+    for box in boxes:
+        y0 = box[1]
+        y1 = box[1]+box[3]
+        x0 = box[0]
+        x1 = box[0]+box[2]
+        image = test[y0:y1, x0:x1]
+        final_img = sizes(image, True, 128)
+        final_images[i] = final_img
+        i += 1
 
         if DEBUG:
             fig = plt.figure()
 
-            fig.add_subplot(3, 1, 1)
+            fig.add_subplot(2, 1, 1)
             plt.imshow(image, cmap=plt.cm.gray, vmin=0, vmax=1)
             #h_hist = density_plot(image, 0)
             #x = np.arange(len(h_hist))
             #plt.plot(h_hist, x)
 
-            fig.add_subplot(3,1,2)
-            plt.imshow(new_img, cmap=plt.cm.gray, vmin=0, vmax=1)
-
-            fig.add_subplot(3, 1, 3)
+            fig.add_subplot(2, 1, 2)
             plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
 
-    final_images = np.array(final_images)
 
     return boxes, final_images
 
 def main():
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
     line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
 
     process_for_classification(line)

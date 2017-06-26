@@ -8,7 +8,7 @@ def update_xml_boxes(im_path, im_file):
     print(im_path)
     print(im_file)
     img = misc.imread(os.path.join(im_path, im_file))
-    boxes, characters = process_for_classification(img)
+    boxes, _ = process_for_classification(img)
     i = 0
 
     xml = im_file.replace(".pgm", "_updated.xml")
@@ -30,7 +30,7 @@ def update_xml_boxes(im_path, im_file):
 
 def main():
     # loop over all files in all lines+xml folders
-    for i in range(1, 13): # 'for i range(1,13)' gets all folders
+    for i in range(1, 3): # 'for i range(1,13)' gets all folders
         rel_path = os.path.relpath('../data/Train/lines+xml/' + str(i) + '/')
         path = os.path.join(os.getcwd(), rel_path)
         files = os.listdir(path)
