@@ -16,7 +16,7 @@ MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
 DEBUG = True
-PLOT = False
+PLOT = True
 
 def binarize_otsu(img):
     "Turns greyscale image into binary using Otsu's method"
@@ -294,7 +294,7 @@ def combine_small(boxes, small_w = 35, small_h = 15):
                 dir = 'right'
                 #print('first char is small')
             elif i >= len(boxes)-1: # Last char, check only with previous char
-                x0 = boxes2[ - 1][0] + boxes2[ - 1][2]
+                x0 = boxes2[-1][0] + boxes2[-1][2]
                 x1 = boxes[i][0]
                 gap = x1 - x0
                 dir = 'left'
@@ -373,7 +373,19 @@ def process_for_classification(img):
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
             left_right = x_coords[j]
             # add a 'box' with left top corner coordinate and width and height
-            boxes.append((left_right[0]-2, im_top_bottom[0]-2, left_right[1] - left_right[0]+2, im_top_bottom[1] - im_top_bottom[0]+2))
+            x = left_right[0]-2
+            y = im_top_bottom[0]-2
+            w = left_right[1] - left_right[0]+2
+            h = im_top_bottom[1] - im_top_bottom[0]+2
+            if x <= 0:
+                x = 0
+            if y <= 0:
+                y = 0
+            if x+w >= test.shape[1]:
+                w = test.shape[1]-x
+            if y+h >= test.shape[0]:
+                h = test.shape[0]-y
+            boxes.append((x,y,w,h))
 
             if DEBUG:
                 rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
@@ -419,19 +431,21 @@ def process_for_classification(img):
     return boxes, final_images
 
 def main():
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # small last character
-    process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
-    process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
-    process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0069-line-003-y1=258-y2=388.pgm')
-    process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18637_0017-line-008-y1=1082-y2=1244.pgm')  # Still table lines left
-    process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0010-line-006-y1=997-y2=1321.pgm') # Only four chars
-    process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0028-line-005-y1=574-y2=716.pgm')
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # small last character
+    #process_for_classification(line)
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
+    #process_for_classification(line)
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
+    #process_for_classification(line)
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0069-line-003-y1=258-y2=388.pgm')
+    #process_for_classification(line)
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18637_0017-line-008-y1=1082-y2=1244.pgm')  # Still table lines left
+    #process_for_classification(line)
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0010-line-006-y1=997-y2=1321.pgm') # Only four chars
+    #process_for_classification(line)
+    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0028-line-005-y1=574-y2=716.pgm')
+    #process_for_classification(line)
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18796_0003-line-001-y1=3-y2=142.pgm')
     process_for_classification(line)
 
 
