@@ -16,7 +16,7 @@ MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
 DEBUG = True
-PLOT = True
+PLOT = False
 
 def binarize_otsu(img):
     "Turns greyscale image into binary using Otsu's method"
@@ -281,13 +281,14 @@ def combine_small(boxes, small_w = 35, small_h = 15):
     boxes2 = []
     skip = False
     for i in range(len(boxes)):
+        print(i)
         if skip:
             skip = False
             continue
         if boxes[i][2] <= small_w: # Width of a box is below 30
             if boxes[i][3] <= small_h:
                 continue
-            if i == 0: # First char, check only with second char
+            if len(boxes2)==0: # First char, check only with second char
                 x2 = boxes[i][0] + boxes[i][2]
                 x3 = boxes[i + 1][0]
                 gap = x3 - x2
@@ -445,7 +446,7 @@ def main():
     #process_for_classification(line)
     #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0028-line-005-y1=574-y2=716.pgm')
     #process_for_classification(line)
-    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18796_0003-line-001-y1=3-y2=142.pgm')
+    line = misc.imread('../data/Train/lines+xml/7/navis-Ming-Qing_HarvYench_18_10_10084_0015-line-002-y1=509-y2=637.pgm')
     process_for_classification(line)
 
 
