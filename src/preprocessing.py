@@ -16,6 +16,7 @@ MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
 DEBUG = True
+PLOT = False
 
 def binarize_otsu(img):
     "Turns greyscale image into binary using Otsu's method"
@@ -273,7 +274,7 @@ def sizes(image, rotate, output):
 
     return new_image
 
-def combine_small(boxes, small_w = 35):
+def combine_small(boxes, small_w = 35, small_h = 15):
     def getKey(item):
         return item[0]
     boxes = sorted(boxes, key = getKey)
@@ -284,6 +285,8 @@ def combine_small(boxes, small_w = 35):
             skip = False
             continue
         if boxes[i][2] <= small_w: # Width of a box is below 30
+            if boxes[i][3] <= small_h:
+                continue
             if i == 0: # First char, check only with second char
                 x2 = boxes[i][0] + boxes[i][2]
                 x3 = boxes[i + 1][0]
@@ -311,7 +314,7 @@ def combine_small(boxes, small_w = 35):
                     gap = gap2
                     dir = 'right'
 
-            if gap > boxes[i][2]: # gap is groter dan breedte character, staat op zichzelf
+            if gap > 8: # gap is groter dan 15, staat op zichzelf
                 boxes2.append(boxes[i])
                 #print('small box is independent')
             else:
@@ -346,7 +349,7 @@ def process_for_classification(img):
 
     test = remove_noise(test, NOISE_SIZE_TH)
 
-    if DEBUG:
+    if DEBUG and PLOT:
         fig = plt.figure()
         a = fig.add_subplot(3, 1, 1)
         plt.imshow(img > 254, cmap=plt.cm.gray)
@@ -370,7 +373,7 @@ def process_for_classification(img):
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
             left_right = x_coords[j]
             # add a 'box' with left top corner coordinate and width and height
-            boxes.append((left_right[0], im_top_bottom[0], left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0]))
+            boxes.append((left_right[0]-2, im_top_bottom[0]-2, left_right[1] - left_right[0]+2, im_top_bottom[1] - im_top_bottom[0]+2))
 
             if DEBUG:
                 rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
@@ -390,8 +393,6 @@ def process_for_classification(img):
     '''
     final_images = np.zeros((len(boxes), 128, 128))
     i = 0
-    ymax = test.shape[0]
-    print(test.shape)
     for box in boxes:
         y0 = box[1]
         y1 = box[1]+box[3]
@@ -402,7 +403,7 @@ def process_for_classification(img):
         final_images[i] = final_img
         i += 1
 
-        if DEBUG:
+        if DEBUG and PLOT:
             fig = plt.figure()
 
             fig.add_subplot(2, 1, 1)
@@ -415,15 +416,22 @@ def process_for_classification(img):
             plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
 
-
     return boxes, final_images
 
 def main():
-    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # character touches table line
-    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
-    #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-003-y1=421-y2=571.pgm') # small last character
+    process_for_classification(line)
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm')
+    process_for_classification(line)
     line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18341_0006-line-009-y1=1224-y2=1377.pgm')
-
+    process_for_classification(line)
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0069-line-003-y1=258-y2=388.pgm')
+    process_for_classification(line)
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18637_0017-line-008-y1=1082-y2=1244.pgm')  # Still table lines left
+    process_for_classification(line)
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0010-line-006-y1=997-y2=1321.pgm') # Only four chars
+    process_for_classification(line)
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0028-line-005-y1=574-y2=716.pgm')
     process_for_classification(line)
 
 
