@@ -281,7 +281,6 @@ def combine_small(boxes, small_w = 35, small_h = 15):
     boxes2 = []
     skip = False
     for i in range(len(boxes)):
-        print(i)
         if skip:
             skip = False
             continue
