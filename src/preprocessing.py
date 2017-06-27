@@ -15,7 +15,7 @@ MIN_TABLE_SIZE_H = 100
 MIN_TABLE_SIZE_V = 100
 SPLIT_TH = 0
 OVERLAP_TH = 0.1
-DEBUG = True
+DEBUG = False
 PLOT = False
 
 def binarize_otsu(img):
