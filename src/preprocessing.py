@@ -124,7 +124,8 @@ def split_with_con_comp(img):
             img_lst_new.append(image)
             lines_lst_new.append(lines[i])
         else:
-            #print('trying to split wide image')
+            if DEBUG:
+                print('trying to split wide image')
 
             img_inv = np.logical_not(image)
             labels, n_labels = ndimage.label(img_inv)
@@ -132,38 +133,45 @@ def split_with_con_comp(img):
             sizes = ndimage.sum(mask, labels, range(n_labels + 1))
             ordered_labels = np.argsort(sizes)
             sz = [int(x) for x in sizes.tolist()[1:]]
-            # print(sz)
             ordered_labels = [i[0] for i in sorted(enumerate(sz), key=lambda x:x[1], reverse=True)]
-            #print(ordered_labels)
+            if DEBUG:
+                print(sz)
+                print(ordered_labels)
             label_i = 1
             components = []
             for i in range(1, n_labels + 1):
                 slice_x, slice_y = ndimage.find_objects(labels == ordered_labels[i - 1] + 1)[0]
                 new_comp = Component(slice_y.start, slice_y.stop)
-                #print('new comp : ' + str(new_comp.__dict__))
+                if DEBUG:
+                    print('new comp : ' + str(new_comp.__dict__))
                 if not components:
                     new_comp.label = label_i
 
                 for comp in components:
-                    #print('compare with comp : ' + str(comp.__dict__))
+                    if DEBUG:
+                        print('compare with comp : ' + str(comp.__dict__))
                     if new_comp.start < comp.start:
                         if new_comp.stop > comp.start:
-                            #print((new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)))
+                            if DEBUG:
+                                print((new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)))
                             if (new_comp.stop - comp.start) / float(min(new_comp.size, comp.size)) > OVERLAP_TH:
                                 new_comp.label = comp.label
                                 break
                     else:
                         if comp.stop > new_comp.start:
-                            #print((comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)))
+                            if DEBUG:
+                                print((comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)))
                             if (comp.stop - new_comp.start) / float(min(new_comp.size, comp.size)) > OVERLAP_TH:
                                 new_comp.label = comp.label
                                 break
                 if not new_comp.label:
-                    #print('fits with none, new label')
+                    if DEBUG:
+                        print('fits with none, new label')
                     label_i += 1
                     new_comp.label = label_i
                 components.append(new_comp)
-                # print(new_comp.__dict__)
+                if DEBUG:
+                    print(new_comp.__dict__)
 
             min_max = [list([9999, 0])] * label_i
             for comp in components:
@@ -174,32 +182,11 @@ def split_with_con_comp(img):
 
             for slic in min_max:
                 lines_lst_new.append((line_count + slic[0], line_count + slic[1]))
-                # lines.append()
                 new_im = image[:, slic[0]:slic[1]]
                 img_lst_new.append(new_im)
 
         line_count += image.shape[1]
     return img_lst_new, lines_lst_new
-
-def remove_whitespace_top_bottom(img):
-    ''' This removes the whitespace from top and bottom of an img (np-array)'''
-    for i in range(0,img.shape[0]):
-        for j in range(0, img.shape[1]):
-            if img[i][j]!=1:
-                break
-        if img[i][j] !=1:
-            break
-    img = np.delete(img,np.arange(i),0)
-    ud_img = np.flipud(img)
-    for i in range(0,ud_img.shape[0]):
-        for j in range(0, ud_img.shape[1]):
-            if ud_img[i][j]!=1:
-                break
-        if ud_img[i][j] !=1:
-            break
-    ud_img = np.delete(ud_img, np.arange(i), 0)
-    img = np.flipud(ud_img)
-    return img
 
 def update_top_bottom(img, top_bottom):
     '''This removes the whitespace from top and bottom of an img (np-array) and returns the updated top and bottom as a tuple'''
@@ -275,6 +262,8 @@ def sizes(image, rotate, output):
     return new_image
 
 def combine_small(boxes, small_w = 35, small_h = 15):
+    if DEBUG:
+        print('Searching for small characters')
     def getKey(item):
         return item[0]
     boxes = sorted(boxes, key = getKey)
@@ -292,15 +281,18 @@ def combine_small(boxes, small_w = 35, small_h = 15):
                 x3 = boxes[i + 1][0]
                 gap = x3 - x2
                 dir = 'right'
-                #print('first char is small')
+                if DEBUG:
+                    print('first char is small')
             elif i >= len(boxes)-1: # Last char, check only with previous char
                 x0 = boxes2[-1][0] + boxes2[-1][2]
                 x1 = boxes[i][0]
                 gap = x1 - x0
                 dir = 'left'
-                #print('last char is small')
+                if DEBUG:
+                    print('last char is small')
             else: # Middle chars, check with previous and next char
-                #print('small box found')
+                if DEBUG:
+                    print('small box found')
                 x0 = boxes2[-1][0]+boxes2[-1][2]
                 x1 = boxes[i][0]
                 x2 = boxes[i][0]+boxes[i][2]
@@ -316,7 +308,8 @@ def combine_small(boxes, small_w = 35, small_h = 15):
 
             if gap > 8: # gap is groter dan 15, staat op zichzelf
                 boxes2.append(boxes[i])
-                #print('small box is independent')
+                if DEBUG:
+                    print('small box is independent')
             else:
                 if dir == 'left':
                      # remove latest entry to boxes2
@@ -326,7 +319,8 @@ def combine_small(boxes, small_w = 35, small_h = 15):
                     h = max(boxes[i][1]+boxes[i][3], boxes2[-1][1]+boxes2[-1][3]) - y
                     del boxes2[-1]
                     boxes2.append((x ,y ,w ,h ))
-                    #print('previous box deleted, small box added to previous box')
+                    if DEBUG:
+                         print('previous box deleted, small box added to previous box')
                 else:
                     x = boxes[i][0]
                     y = min(boxes[i][1], boxes[i+1][1])
@@ -334,7 +328,8 @@ def combine_small(boxes, small_w = 35, small_h = 15):
                     h = max(boxes[i+1][1]+boxes[i+1][3], boxes[i][1]+boxes[i][3]) - y
                     boxes2.append((x, y, w, h))
                     skip = True
-                    #print('small box added to right box, next one skipped')
+                    if DEBUG:
+                        print('small box added to right box, next one skipped')
         else:
             boxes2.append(boxes[i])
     return boxes2
@@ -362,14 +357,15 @@ def process_for_classification(img):
     lines_list, top_bottom, white_space = split_by_density(test, 0)
     boxes = []
 
-    if DEBUG:
+    if DEBUG and PLOT:
         fig, (ax1, ax2) = plt.subplots(2, sharex=True)
         ax1.imshow(test, cmap=plt.cm.gray)
 
     for i in range(len(lines_list)):
         im_list, x_coords = split_with_con_comp(lines_list[i])
         for j in range(len(im_list)):
-            #print("j is : " + str(j))
+            if DEBUG:
+                print("j is : " + str(j))
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
             left_right = x_coords[j]
             # add a 'box' with left top corner coordinate and width and height
@@ -387,13 +383,13 @@ def process_for_classification(img):
                 h = test.shape[0]-y
             boxes.append((x,y,w,h))
 
-            if DEBUG:
+            if DEBUG and PLOT:
                 rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
                 ax1.add_patch(rect)
 
     boxes = combine_small(boxes)
 
-    if DEBUG:
+    if DEBUG and PLOT:
         ax2.imshow(test, cmap=plt.cm.gray)
         for box in boxes:
             rect = patches.Rectangle((box[0],box[1]), box[2], box[3], linewidth=1, edgecolor='g', facecolor='none')
