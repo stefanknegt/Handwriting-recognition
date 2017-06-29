@@ -117,40 +117,47 @@ def CNN1(num_classes, input_shape):
 
     return model
 
-
-def CNN2(num_classes, input_shape):
+def CNN1_no_dropout(num_classes, input_shape):
     # create model
     model = Sequential()
 
-    model.add(Conv2D(512, (5, 5), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    model.add(Conv2D(16, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(256, (5, 5), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(32, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(128, (5, 5), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(64, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(64, (5, 5), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(128, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(32, (5, 5), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(256, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(16, (5, 5), strides=1, padding='same', input_shape=input_shape, activation='relu'))
+    #model.add(Dropout(0.5))
+
+    model.add(Conv2D(512, (3, 3), strides=1, padding='same', input_shape=input_shape, activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2),strides=2))
-    model.add(Dropout(0.5))
+    #model.add(Dropout(0.5))
 
     model.add(Flatten())
     model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
+    #model.add(Dropout(0.5))
     model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
+    #model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='softmax'))
     # Compile model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     return model
+
+
+
 
 
 if __name__ == '__main__':
