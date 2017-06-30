@@ -50,20 +50,7 @@ def remove_table_lines(img, x, y):
     # here recon_image will be a black image with a white region around the location of each identified table line
     recon_image = ndimage.binary_dilation(eroded, structure=str_d).astype(eroded.dtype) 
     res = np.logical_or(img, recon_image) # black pixels within the table line region(s) are removed
-    return res
-    
-def remove_table_lines2(img, ref_img, x, y):
-    '''Removes horizontal or vertical table line GAAN WE NIET INLEVEREN GA IK NOG WEL GEBRUIKEN OM RESULTATEN TE KRIJGEN VOOR IOUS'''
-    bin_img = ref_img > 254
-    img_inv = np.logical_not(bin_img)
-    str_e = np.ones((x, y))
-    str_d = np.ones((x+5, y+5)) # dilate with a slightly larger structuring element than for the erosion to get rid of irregular table lines a bit better
-    eroded = ndimage.binary_erosion(img_inv, structure=str_e).astype(img_inv.dtype)
-    # recon_image = ndimage.binary_propagation(eroded, mask=img_inv)
-    recon_image = ndimage.binary_dilation(eroded, structure=str_d).astype(eroded.dtype)
-    #recon_image = np.logical_not(recon_image)
-    res = np.logical_or(img, recon_image)
-    return res    
+    return res   
 
 def remove_noise(img, threshold, inv=True):
     '''Removes small noise pixels using morphological closing or opening by reconstruction
@@ -420,9 +407,9 @@ def process_for_classification(img):
     '''
     otsu = binarize_otsu(img)
     
-    test = remove_noise(test, NOISE_SIZE_TH, inv=False)
+    test = remove_noise(otsu, NOISE_SIZE_TH, inv=False)
     
-    test = remove_table_lines(otsu, 1, MIN_TABLE_SIZE_H)
+    test = remove_table_lines(test, 1, MIN_TABLE_SIZE_H)
     test = remove_table_lines(test, MIN_TABLE_SIZE_V, 1)
 
     test = remove_noise(test, NOISE_SIZE_TH)
