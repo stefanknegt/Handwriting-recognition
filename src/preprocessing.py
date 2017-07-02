@@ -310,7 +310,7 @@ def sizes(image, rotate):
             image = np.concatenate((image, a), axis=1)
 
     ## This is the final resizing and padding
-    new_image = misc.imresize(image, 124, 124, interp='nearest')
+    new_image = misc.imresize(image, (124, 124), interp='nearest')
     a = np.ones((edge, new_image.shape[0]), dtype=np.int)
     new_image = np.insert(new_image, 0, a, 1)
     a = np.ones((new_image.shape[0], edge), dtype=np.int)
