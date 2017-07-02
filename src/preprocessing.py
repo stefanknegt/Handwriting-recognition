@@ -261,11 +261,21 @@ def update_top_bottom(img, top_bottom):
     top_bottom = (top_bottom[0] + top_offset, top_bottom[1] - bot_offset) # add offsets to top and bottom ycoords
     return img, top_bottom 
 
-def sizes(image, rotate, output):
-    '''Resizes images to be 128 by 128 pixels?'''
+def sizes(image, rotate):
+    '''Rotates input, zeropads to square image and resizes result to be 128 by 128 pixels with 2 pixel whitespace border
+
+    parameters
+    image:      input image
+    rotate:     boolean, true will rotate the image 90 degrees clockwise
+
+    returns
+    new_image:  the rotated, centered 128*128 pixels image
+
+
+    '''
     if rotate:
         image = np.rot90(image, 3)
-    edge = int((output/32.0)/2.0)
+    edge = 2
     if image.shape[0]!=image.shape[1]:
         if image.shape[0] >= image.shape[1]:
             max_size = image.shape[0]
@@ -300,7 +310,7 @@ def sizes(image, rotate, output):
             image = np.concatenate((image, a), axis=1)
 
     ## This is the final resizing and padding
-    new_image = misc.imresize(image, (output-int(2*edge), output-int(2*edge)), interp='nearest')
+    new_image = misc.imresize(image, 124, 124, interp='nearest')
     a = np.ones((edge, new_image.shape[0]), dtype=np.int)
     new_image = np.insert(new_image, 0, a, 1)
     a = np.ones((new_image.shape[0], edge), dtype=np.int)
@@ -309,14 +319,14 @@ def sizes(image, rotate, output):
     new_image = np.insert(new_image, 0, a, 0)
     new_image = np.concatenate((new_image, a), axis=0)
 
-
     return new_image
 
 def combine_small(boxes, small_w = 35, small_h = 15):
-    '''Combines or appends small loose character strokes that are oversegmented when an image split by density
+    '''Combines or appends small loose character strokes that are oversegmented when an image is split by density
+        also deletes boxes that are smaller than both thresholds
     
     parameters
-    boxes:      a lsit of bounding boxes of characters in a line
+    boxes:      a list of bounding boxes of characters in a line
     small_w:    width threshold
     small_h:    height threshold
     
@@ -402,8 +412,8 @@ def process_for_classification(img):
     img:            the input image
     
     returns
-    final_image:    a list of character images (numpy arrays)
     boxes:          a list of bounding boxes for the characters within the original image
+    final_image:    a list of character images (numpy arrays)
     '''
     otsu = binarize_otsu(img)
     
@@ -477,7 +487,7 @@ def process_for_classification(img):
         x0 = box[0]
         x1 = box[0]+box[2]
         image = test[y0:y1, x0:x1]
-        final_img = sizes(image, True, 128)
+        final_img = sizes(image, True)
         final_images[i] = final_img
         i += 1
 
