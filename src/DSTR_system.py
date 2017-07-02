@@ -10,18 +10,23 @@ DEBUG = True    # boolean to log debugging statements
 PLOT = False    # boolean to draw image plots
 
 # LOAD MODEL
-script_dir = os.path.dirname(__file__)
-print(script_dir)
-rel_path = "red_extended_cnn1_nodropout.h5"
-abs_file_path = os.path.join(script_dir, rel_path)
-print(abs_file_path)
-model = load_model(abs_file_path)
-if DEBUG:
-    model.summary()
+try:
+    script_dir = os.path.dirname(__file__)
+    rel_path = "red_extended_cnn1_nodropout.h5"
+    abs_file_path = os.path.join(script_dir, rel_path)
+    model = load_model(abs_file_path)
+    if DEBUG:
+        model.summary()
+except:
+    sys.exit('Could not load model, is the path specified correctly?')
 
 # LOAD LABELS
-with open('names_red.txt', 'rb') as fp:
-    names = pickle.load(fp)
+try:
+    with open('names_red.txt', 'rb') as fp:
+        names = pickle.load(fp)
+except:
+    sys.exit('Could not load labels file, is the path specified correctly?')
+
 
 def main(folder):
     path = os.path.relpath(folder)
@@ -31,7 +36,6 @@ def main(folder):
             process_line(pat, filename)
         else:
             print(filename + ' is not a .pgm file, ignored')
-
 
 def process_line(path, filename):
     # LOAD IMAGE
