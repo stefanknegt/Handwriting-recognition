@@ -6,57 +6,63 @@ from preprocessing import process_for_classification
 from keras import backend as K
 K.set_image_data_format('channels_last')
 
-DEBUG = True
-PLOT = False
+DEBUG = True    # boolean to log debugging statements
+PLOT = False    # boolean to draw image plots
 
-def main(im_file='../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-y1=0-y2=289.pgm', xml='.'):
-    # LOAD MODEL
-    try:
-        script_dir = os.path.dirname(__file__)
-        rel_path = "baseline_extended.h5"
-        abs_file_path = os.path.join(script_dir, rel_path)
-        model = load_model(abs_file_path)
-        if DEBUG:
-            model.summary()
-    except:
-        sys.exit('Could not load model, is the path specified correctly?')
+# LOAD MODEL
+try:
+    script_dir = os.path.dirname(__file__)
+    rel_path = "red_extended_cnn1_nodropout.h5"
+    abs_file_path = os.path.join(script_dir, rel_path)
+    model = load_model(abs_file_path)
+    if DEBUG:
+        model.summary()
+except:
+    sys.exit('Could not load model, is the path specified correctly?')
 
-    # LOAD LABELS
-    try:
-        with open('names.txt', 'rb') as fp:
-            names = pickle.load(fp)
-    except:
-        sys.exit('Could not load labels file, is the path specified correctly?')
+# LOAD LABELS
+try:
+    with open('names_red.txt', 'rb') as fp:
+        names = pickle.load(fp)
+except:
+    sys.exit('Could not load labels file, is the path specified correctly?')
 
+
+def main(folder):
+    path = os.path.relpath(folder)
+    for filename in os.listdir(path):
+        pat = os.path.join(path, filename)
+        if '.pgm' in filename:
+            process_line(pat, filename)
+        else:
+            print(filename + ' is not a .pgm file, ignored')
+
+def process_line(path, filename):
     # LOAD IMAGE
     try:
-        path = os.path.relpath(im_file)
         img = misc.imread(path)
         if DEBUG:
             print('Processing: '+str(path))
     except:
-        sys.exit('Could not load image, is the path specified correctly?')
+        print('Could not load image, is the path specified correctly? filename: ' + filename)
+        return 0
 
     # PREPROCESS IMAGE / SEGMENT
     try:
         boxes, characters = process_for_classification(img)
     except:
-        sys.exit('Could not segment image')
+        print('Could not segment image, filename: ' + filename)
+        return 0
 
     # EXPAND FOUND CHARS FOR CLASSIFICATION
     try:
-        if K.image_data_format() == 'channels_first':
-            characters = np.expand_dims(characters, axis=1)
-            if DEBUG:
-                print('Found ' + str(characters.shape[0]) + ' characters!')
-                print('Test shape of line: ' + str(characters.shape))
-        else:
-            characters = np.expand_dims(characters, axis=4)
-            if DEBUG:
-                print('Found ' + str(characters.shape[0]) + ' characters!')
-                print('Test shape of line: ' + str(characters.shape))
+        characters = np.expand_dims(characters, axis=4)
+        if DEBUG:
+            print('Found ' + str(characters.shape[0]) + ' characters!')
+            print('Test shape of line: ' + str(characters.shape))
     except:
-        sys.exit('Could not expand character dimensions')
+        print('Could not expand character dimensions, filename: ' + filename)
+        return 0
 
     # SINGLE MODEL CLASSIFICATION
     try:
@@ -64,7 +70,8 @@ def main(im_file='../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-
         predicted_class_model = np.argmax(predictions, axis=1)
 
     except:
-        sys.exit('Could not classify characters')
+        print('Could not classify characters, filename: ' + filename)
+        return 0
 
     try:
         if DEBUG:
@@ -75,13 +82,13 @@ def main(im_file='../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-
                 entropy_model1 = predictions[i][predicted_class_model1]
                 entropies.append(entropy_model1)
     except:
-        sys.exit('Could nog calculate entropy')
+        print('Could nog calculate entropy, filename: ' + filename)
+        return 0
 
     # WRITE RESULTS TO XML
     try:
         j = 0
-        if xml=='.':
-            xml = im_file.replace(".pgm", ".xml")
+        xml = path.replace(".pgm", ".xml")
         with open(xml, 'wb') as f:
             for box in boxes:
                 # pad each value with zeros to length of four
@@ -92,7 +99,7 @@ def main(im_file='../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-
                 h = str(box[3])
                 pred = names[predicted_class_model[j]]
                 j += 1
-                line = im_file.replace('.pgm', '') + '-zone-DSTR-x=' + x + '-y=' + y + '-w=' + w + '-h=' + h + ' <utf> ' + pred + ' </utf>' + '\n'
+                line = filename.replace('.pgm', '') + '-zone-DSTR-x=' + x + '-y=' + y + '-w=' + w + '-h=' + h + ' <utf> ' + pred + ' </utf>' + '\n'
                 f.write(line)
                 if DEBUG:
                     print(line)
@@ -103,12 +110,11 @@ def main(im_file='../data/Train/lines+xml/1/navis-Ming-Qing_18341_0004-line-001-
                         plt.title('Classified as "' + str(pred) + '" with activation ' + str(act))
                         plt.show()
     except:
-        sys.exit('Could not write results to xml')
+        print('Could not write results to xml, filename: ' + filename)
+        return 0
 
 if __name__ == '__main__':
-    if len(sys.argv)==3:
-        main(sys.argv[1], sys.argv[2])
-    elif len(sys.argv)==2:
+    if len(sys.argv)==2:
         main(sys.argv[1])
     else:
-        main()
+        sys.exit('Please specify a folder with test images as only argument')
