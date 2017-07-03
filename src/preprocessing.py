@@ -14,7 +14,7 @@ MIN_TABLE_SIZE_V = 100  # minimum nr of pixels vert. lines have to be to count a
 SPLIT_TH = 0            # threshold black pixel density for pixel density splitting
 OVERLAP_TH = 0.1        # threshold for percentage of overlap for splitting based on connected component overlap
 DEBUG = False           # boolean to log debugging statements
-PLOT = False            # boolean to draw image plots
+PLOT = True            # boolean to draw image plots
 
 def binarize_otsu(img):
     '''Turns greyscale image into binary using Otsu's method.
@@ -321,7 +321,7 @@ def sizes(image, rotate):
 
     return new_image
 
-def combine_small(boxes, small_w = 35, small_h = 15):
+def combine_small(boxes, small_w = 35, small_h = 25):
     '''Combines or appends small loose character strokes that are oversegmented when an image is split by density
         also deletes boxes that are smaller than both thresholds
     
@@ -377,7 +377,7 @@ def combine_small(boxes, small_w = 35, small_h = 15):
                     gap = gap2
                     dir = 'right'
 
-            if gap > 8: # gap is groter dan 15, staat op zichzelf
+            if gap >= 10: # gap is groter dan 10, staat op zichzelf
                 boxes2.append(boxes[i])
                 if DEBUG:
                     print('small box is independent')
@@ -425,7 +425,7 @@ def process_for_classification(img):
     test = remove_noise(test, NOISE_SIZE_TH)
 
 
-    if DEBUG and PLOT:
+    if PLOT:
         fig = plt.figure()
         a = fig.add_subplot(3, 1, 1)
         plt.imshow(img > 254, cmap=plt.cm.gray)
@@ -438,15 +438,11 @@ def process_for_classification(img):
     lines_list, top_bottom, white_space = split_by_density(test, 0)
     boxes = []
 
-    if DEBUG and PLOT:
-        fig, (ax1, ax2) = plt.subplots(2, sharex=True)
-        ax1.imshow(test, cmap=plt.cm.gray)
 
     for i in range(len(lines_list)):
         im_list, x_coords = split_with_con_comp(lines_list[i])
+
         for j in range(len(im_list)):
-            if DEBUG:
-                print("j is : " + str(j))
             im_list[j], im_top_bottom = update_top_bottom(im_list[j], top_bottom[i])
             left_right = x_coords[j]
             # add a 'box' with left top corner coordinate and width and height
@@ -464,24 +460,35 @@ def process_for_classification(img):
                 h = test.shape[0]-y
             boxes.append((x,y,w,h))
 
-            if DEBUG and PLOT:
-                rect = patches.Rectangle((left_right[0], im_top_bottom[0]), left_right[1] - left_right[0], im_top_bottom[1] - im_top_bottom[0], linewidth=1, edgecolor='g', facecolor='none')
-                ax1.add_patch(rect)
+    boxes2 = combine_small(boxes)
 
-    boxes = combine_small(boxes)
+    if PLOT:
+        fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+        ax1.imshow(test, cmap=plt.cm.gray)
+        print(top_bottom)
+        for tup in x_coords:
+            print(tup)
+            rect = patches.Rectangle((tup[0], top_bottom[0][0]), tup[1] - tup[0], top_bottom[0][1] - top_bottom[0][0],
+                                     linewidth=1, edgecolor='g', facecolor='none')
+            ax1.add_patch(rect)
 
-    if DEBUG and PLOT:
         ax2.imshow(test, cmap=plt.cm.gray)
         for box in boxes:
-            rect = patches.Rectangle((box[0],box[1]), box[2], box[3], linewidth=1, edgecolor='g', facecolor='none')
+            rect = patches.Rectangle((box[0], box[1]), box[2], box[3],
+                                     linewidth=1, edgecolor='g', facecolor='none')
             ax2.add_patch(rect)
+
+        ax3.imshow(test, cmap=plt.cm.gray)
+        for box in boxes2:
+            rect = patches.Rectangle((box[0],box[1]), box[2], box[3], linewidth=1, edgecolor='g', facecolor='none')
+            ax3.add_patch(rect)
         plt.show()
 
     
     # Extract images from boxes
-    final_images = np.zeros((len(boxes), 128, 128))
+    final_images = np.zeros((len(boxes2), 128, 128))
     i = 0
-    for box in boxes:
+    for box in boxes2:
         y0 = box[1]
         y1 = box[1]+box[3]
         x0 = box[0]
@@ -501,7 +508,7 @@ def process_for_classification(img):
             plt.imshow(final_img, cmap=plt.cm.gray, vmin=0, vmax=1)
             plt.show()
 
-    return boxes, final_images
+    return boxes2, final_images
 
 def main():
     '''The preprocessing main can be used to call process_for_classification on a single example line
@@ -519,8 +526,8 @@ def main():
        #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0010-line-006-y1=997-y2=1321.pgm') # Only four chars
        #line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0028-line-005-y1=574-y2=716.pgm')
     '''
-    
-    line = misc.imread('../data/Train/lines+xml/7/navis-Ming-Qing_HarvYench_18_10_10084_0015-line-002-y1=509-y2=637.pgm')
+    line = misc.imread('../data/Train/lines+xml/1/navis-Ming-Qing_18641_0069-line-003-y1=258-y2=388.pgm')
+    #line = misc.imread('../data/Train/lines+xml/7/navis-Ming-Qing_HarvYench_18_10_10084_0015-line-002-y1=509-y2=637.pgm')
     process_for_classification(line)
 
 
